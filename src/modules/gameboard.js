@@ -40,7 +40,6 @@ class Gameboard {
     } else {
       this.missedHits.push([x, y]);
     }
-
     return ship;
   }
 

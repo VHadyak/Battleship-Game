@@ -2,10 +2,11 @@
   "name": "webpack-template",
   "version": "1.0.0",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "test": "jest",
-    "start": "webpack serve --config webpack.dev.js",
-    "build": "NODE_ENV=production webpack --config webpack.prod.js",
+    "start": "webpack serve --config webpack.dev.cjs",
+    "build": "NODE_ENV=production webpack --config webpack.prod.cjs",
     "deploy": "git subtree push --prefix dist origin gh-pages",
     "lint": "eslint .",
     "format": "prettier --write ."

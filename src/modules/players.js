@@ -19,3 +19,5 @@ console.table(realPlayer.gameboard.board);
 
 // Computer's Board:
 console.table(computerPlayer.gameboard.board);
+
+export { Player };
