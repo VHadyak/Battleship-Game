@@ -22,6 +22,52 @@ body {
   min-height: 100vh;
   min-height: 100svh;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* GAMEBOARD */
+.grid-container {
+  display: flex;
+  gap: 200px;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  width: 400px;
+}
+
+#real-player-board {
+  border: 2px solid rgb(14, 154, 25);
+}
+
+#computer-board {
+  border: 2px solid rgb(228, 20, 20);
+}
+
+.row,
+.column {
+  display: flex;
+  flex: 1;
+
+  & .column {
+    border: 1px solid rgb(0, 0, 0);
+  }
+}
+
+.ship {
+  background-color: rgb(78, 79, 78);
+}
+
+.hit {
+  background-color: rgb(148, 40, 40);
+}
+
+.miss {
+  background-color: rgb(43, 127, 154);
 }
 
 @media (prefers-reduced-motion: no-preference) {

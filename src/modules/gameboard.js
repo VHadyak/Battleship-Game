@@ -1,4 +1,4 @@
-class Gameboard {
+export class Gameboard {
   constructor() {
     this.board = [];
     this.storeShip = new Map(); // Track each ship's coordinates within the board
@@ -8,12 +8,8 @@ class Gameboard {
   // Create a 10x10 board
   createBoard() {
     for (let i = 0; i < 10; i++) {
-      this.board[i] = new Array(10).fill("+");
+      this.board[i] = new Array(10).fill("0");
     }
-  }
-
-  getBoard() {
-    return this.board;
   }
 
   // Place ship on the board based on its coordinates
@@ -25,7 +21,7 @@ class Gameboard {
     }
 
     coordinates.forEach(([x, y]) => {
-      this.board[x][y] = "■"; // for visuals
+      this.board[x][y] = "■"; // for visuals (ship)
       this.storeShip.set(`${x},${y}`, ship); // Map the coordinate on the board to its corresponding ship
     });
   }
@@ -34,10 +30,12 @@ class Gameboard {
   receiveAttack(x, y) {
     const ship = this.storeShip.get(`${x},${y}`);
 
-    // If attack coordinates match with ship coordinates, then it was hit
+    // If attack coordinates match with ship coordinates, then it was hit, else, miss
     if (ship) {
       ship.hit();
+      this.board[x][y] = "hit";
     } else {
+      this.board[x][y] = "miss";
       this.missedHits.push([x, y]);
     }
     return ship;
@@ -54,8 +52,6 @@ class Gameboard {
     return true;
   }
 }
-
-export { Gameboard };
 
 /*
 const ranX = generateRanNum(0, 9);
