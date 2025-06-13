@@ -1,6 +1,3 @@
-import { Game } from "./game.js";
-import { realPlayer, computerPlayer } from "./players.js";
-
 // Player board elements
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
@@ -27,17 +24,14 @@ export function renderBoard(gameboard, boardElement) {
 
       const value = board[i][j]; // Get value of the cell ("ship", "hit", or "miss")
 
-      updateState(value, cell);
+      updateCellState(value, cell);
       row.appendChild(cell);
     }
   }
 }
-// Render the game boards for 2 players
-renderBoard(realPlayer.gameboard, realPlayerBoardEl);
-renderBoard(computerPlayer.gameboard, computerPlayerBoardEl);
 
 // Update the cell's appearance based on game state
-function updateState(value, cell) {
+function updateCellState(value, cell) {
   if (value === "■") {
     cell.classList.add("ship");
   } else if (value === "hit") {
@@ -47,11 +41,15 @@ function updateState(value, cell) {
   }
 }
 
+// Switch boards based on player's turn
+export function switchBoard(player) {
+  if (player.isComputer) {
+    realPlayerBoardEl.classList.remove("disable");
+    computerPlayerBoardEl.classList.add("disable");
+  } else {
+    computerPlayerBoardEl.classList.remove("disable");
+    realPlayerBoardEl.classList.add("disable");
+  }
+}
+
 //console.table(realPlayer.gameboard.board);
-
-const cells = document.querySelectorAll(".column");
-const game = new Game();
-
-cells.forEach((cell) => {
-  cell.addEventListener("click", (e) => game.handlePlayerMove(e.target));
-});
