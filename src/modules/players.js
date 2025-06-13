@@ -1,6 +1,5 @@
 import { Gameboard } from "./gameboard.js";
 import { Ship } from "./ships.js";
-
 export class Player {
   constructor(isComputer = false) {
     this.gameboard = new Gameboard();
@@ -50,6 +49,7 @@ function placeShips(player) {
     [6, 1],
     [7, 1],
   ]);
+  return { ship1, ship2, ship3, ship4, ship5 };
 }
 
 placeShips(realPlayer);

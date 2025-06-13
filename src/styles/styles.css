@@ -58,16 +58,15 @@ body {
   }
 }
 
-/* Apply hover effect over cells only for computer's gameboard
-
-   #computer-board > .row > .column:hover {
-      background-color: rgb(188, 181, 173);
-      cursor: pointer;
-   }  */
-
-.column:hover {
+/* Exclude hover effect over miss and hit cells */
+.column:not(.miss, .hit):hover {
   background-color: rgb(188, 181, 173);
   cursor: pointer;
+}
+
+/* Disable clicking over miss and hit cells */
+.column:is(.miss, .hit) {
+  pointer-events: none;
 }
 
 /* Disable the board */
@@ -85,7 +84,11 @@ body {
 }
 
 .miss {
-  background-color: rgb(43, 127, 154);
+  background-color: rgb(26, 81, 99);
+}
+
+.sunk {
+  background-color: chartreuse;
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -31,13 +31,20 @@ export function renderBoard(gameboard, boardElement) {
 }
 
 // Update the cell's appearance based on game state
-function updateCellState(value, cell) {
-  if (value === "■") {
-    cell.classList.add("ship");
-  } else if (value === "hit") {
-    cell.classList.add("hit");
-  } else if (value === "miss") {
-    cell.classList.add("miss");
+export function updateCellState(value, cell) {
+  switch (value) {
+    case "■":
+      cell.classList.add("ship");
+      break;
+    case "hit":
+      cell.classList.add("hit");
+      break;
+    case "miss":
+      cell.classList.add("miss");
+      break;
+    case "sunk":
+      cell.classList.add("sunk");
+      break;
   }
 }
 
@@ -52,4 +59,10 @@ export function switchBoard(player) {
   }
 }
 
-//console.table(realPlayer.gameboard.board);
+// Get coordinates from the clicked cell
+export function getCoordinates(cell) {
+  const x = Number(cell.getAttribute("data-row"));
+  const y = Number(cell.getAttribute("data-col"));
+
+  return [x, y];
+}
