@@ -7,6 +7,7 @@ export class Game {
     this.player2 = computerPlayer;
     this.currentPlayer = realPlayer;
     this.opponent = computerPlayer;
+    this.computerInterval = null;
   }
 
   handlePlayerMove(cell, boardElement) {
@@ -19,7 +20,39 @@ export class Game {
 
     this.getCellValue(targetPlayer, cell);
     this.handleSunkShip(targetPlayer, cell, boardElement);
-    this.switchTurn();
+
+    if (this.opponent.isComputer) {
+      this.switchTurn(); // Switch to computer's turn
+      clearInterval(this.computerInterval); // Clear any existing intervals
+
+      // Set up an interval simulating computer's thinking
+      this.computerInterval = setInterval(
+        () => this.handleComputerTurn(),
+        5000,
+      );
+    }
+  }
+
+  handleComputerTurn() {
+    // Computer attacks
+    if (!this.opponent.isComputer) {
+      console.log("computer attacked");
+      this.switchTurn(); // Give turn back to real player
+
+      // Reset interval completely after computer has attacked
+      clearInterval(this.computerInterval);
+      this.computerInterval = null;
+    }
+  }
+
+  switchTurn() {
+    this.currentPlayer =
+      this.currentPlayer === this.player1 ? this.player2 : this.player1;
+
+    this.opponent =
+      this.currentPlayer === this.player1 ? this.player2 : this.player1;
+
+    switchBoard(this.currentPlayer);
   }
 
   handleSunkShip(targetPlayer, cell, boardElement) {
@@ -52,15 +85,5 @@ export class Game {
     const value = player.gameboard.board[x][y];
     // Update cell state based on the values that are defined
     updateCellState(value, cell);
-  }
-
-  switchTurn() {
-    this.currentPlayer =
-      this.currentPlayer === this.player1 ? this.player2 : this.player1;
-
-    this.opponent =
-      this.currentPlayer === this.player1 ? this.player2 : this.player1;
-
-    switchBoard(this.currentPlayer);
   }
 }

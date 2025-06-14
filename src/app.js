@@ -16,12 +16,11 @@ renderBoard(realPlayer.gameboard, realPlayerBoardEl);
 renderBoard(computerPlayer.gameboard, computerPlayerBoardEl);
 
 // Handle cell clicks on the game boards and assign it to game logic
-[realPlayerBoardEl, computerPlayerBoardEl].forEach((board) => {
-  board.addEventListener("click", (e) => {
-    const cell = e.target;
 
-    if (cell.classList.contains("column")) {
-      game.handlePlayerMove(cell, board);
-    }
-  });
+computerPlayerBoardEl.addEventListener("click", (e) => {
+  const cell = e.target;
+
+  if (cell.classList.contains("column")) {
+    game.handlePlayerMove(cell, computerPlayerBoardEl);
+  }
 });

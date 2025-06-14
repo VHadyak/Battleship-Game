@@ -51,11 +51,12 @@ export function updateCellState(value, cell) {
 // Switch boards based on player's turn
 export function switchBoard(player) {
   if (player.isComputer) {
-    realPlayerBoardEl.classList.remove("disable");
+    realPlayerBoardEl.classList.add("transparent");
     computerPlayerBoardEl.classList.add("disable");
   } else {
     computerPlayerBoardEl.classList.remove("disable");
     realPlayerBoardEl.classList.add("disable");
+    realPlayerBoardEl.classList.remove("transparent");
   }
 }
 
