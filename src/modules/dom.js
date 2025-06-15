@@ -55,8 +55,8 @@ export function switchBoard(player) {
     computerPlayerBoardEl.classList.add("disable");
   } else {
     computerPlayerBoardEl.classList.remove("disable");
-    realPlayerBoardEl.classList.add("disable");
     realPlayerBoardEl.classList.remove("transparent");
+    realPlayerBoardEl.classList.add("disable");
   }
 }
 

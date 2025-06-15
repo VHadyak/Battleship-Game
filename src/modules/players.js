@@ -21,6 +21,7 @@ function placeShips(player) {
   let ship3 = new Ship(5);
   let ship4 = new Ship(4);
   let ship5 = new Ship(2);
+  let ship6 = new Ship(5);
 
   player.gameboard.placeShip(ship1, [
     [0, 0],
@@ -49,7 +50,14 @@ function placeShips(player) {
     [6, 1],
     [7, 1],
   ]);
-  return { ship1, ship2, ship3, ship4, ship5 };
+  player.gameboard.placeShip(ship6, [
+    [4, 4],
+    [4, 3],
+    [4, 2],
+    [4, 1],
+    [4, 0],
+  ]);
+  return { ship1, ship2, ship3, ship4, ship5, ship6 };
 }
 
 placeShips(realPlayer);

@@ -3,6 +3,7 @@ export class Gameboard {
     this.board = [];
     this.storeShip = new Map(); // Track each ship's coordinates within the board
     this.missedHits = []; // Store all of the coordinates of missed hits
+    this.hits = new Set(); // Store only non-duplicate hits
   }
 
   // Create a 10x10 board
@@ -28,9 +29,10 @@ export class Gameboard {
 
   // Attack the ship and check if it was a hit or miss
   receiveAttack(x, y) {
+    this.hits.add(`${x},${y}`); // Avoid same coordinate attacks
     const ship = this.storeShip.get(`${x},${y}`);
 
-    // If attack coordinates match with ship coordinates, then it was hit, else, miss
+    // If attack coordinates match ship coordinates, then it was hit, else, miss
     if (ship) {
       ship.hit();
       this.board[x][y] = "hit";
@@ -52,12 +54,3 @@ export class Gameboard {
     return true;
   }
 }
-
-/*
-const ranX = generateRanNum(0, 9);
-const ranY = generateRanNum(0, 9);
-
-// Generate random number for computer attack
-function generateRanNum(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-} */
