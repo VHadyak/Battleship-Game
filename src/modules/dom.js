@@ -4,7 +4,7 @@ export const computerPlayerBoardEl = document.querySelector("#computer-board");
 
 // Create UI gameboard for both players
 export function renderBoard(gameboard, boardElement) {
-  const boardSize = 10;
+  const boardSize = 5;
   const board = gameboard.board;
 
   boardElement.innerHTML = ""; // Clear the board before rerendering

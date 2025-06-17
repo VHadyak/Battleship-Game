@@ -3,13 +3,13 @@ export class Gameboard {
     this.board = [];
     this.storeShip = new Map(); // Track each ship's coordinates within the board
     this.missedHits = []; // Store all of the coordinates of missed hits
-    this.hits = new Set(); // Store only non-duplicate hits
+    this.trackAttacks = new Set(); // Store only non-duplicate attacks
   }
 
   // Create a 10x10 board
   createBoard() {
-    for (let i = 0; i < 10; i++) {
-      this.board[i] = new Array(10).fill("0");
+    for (let i = 0; i < 5; i++) {
+      this.board[i] = new Array(5).fill("0");
     }
   }
 
@@ -29,12 +29,13 @@ export class Gameboard {
 
   // Attack the ship and check if it was a hit or miss
   receiveAttack(x, y) {
-    this.hits.add(`${x},${y}`); // Avoid same coordinate attacks
     const ship = this.storeShip.get(`${x},${y}`);
+
+    this.trackAttacks.add(`${x},${y}`); // Avoid same coordinate attacks
 
     // If attack coordinates match ship coordinates, then it was hit, else, miss
     if (ship) {
-      ship.hit();
+      ship.hit(x, y);
       this.board[x][y] = "hit";
     } else {
       this.board[x][y] = "miss";

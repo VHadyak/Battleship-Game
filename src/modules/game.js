@@ -14,10 +14,11 @@ export class Game {
     this.opponent = computerPlayer;
     this.computerInterval = null;
     this.lastHit = null; // Track the last hit of the ship
+    this.nextTarget = null; // Get the next target of the attack
   }
 
+  // Reflect the player's move visually
   processMoveResult(cell, boardElement) {
-    // Reflect the player's move visually
     this.handleCellState(this.opponent, cell);
     this.handleSunkShip(this.opponent, cell, boardElement);
   }
@@ -52,12 +53,16 @@ export class Game {
   computerAttacks() {
     let coordinate;
 
-    // If last attack hit the ship, target the neighbor cells
-    if (this.lastHit) {
-      coordinate = this.targetAndHunt(this.lastHit);
+    // If next target is known after 2+ hits, update the coordinate
+    if (this.nextTarget) {
+      coordinate = this.nextTarget;
+      this.nextTarget = null;
+    } else if (this.lastHit) {
+      // Target adjacent cells after first hit was detected
+      coordinate = this.targetShip(this.lastHit);
     } else {
-      // If last attack is a miss, attack the cell randomly
-      coordinate = this.generateUniqueRanCoordinate(this.opponent.gameboard);
+      // Hunt for the ships randomly if no hit was detected
+      coordinate = this.huntShip(this.opponent.gameboard);
     }
 
     const [x, y] = coordinate;
@@ -67,15 +72,21 @@ export class Game {
     this.opponent.gameboard.receiveAttack(x, y);
 
     if (ship && !ship.isSunk()) {
+      // Predict the direction for ship attack, if at least 2 hits have been registered to the ship
+      if (ship.hitPositions.length >= 2) {
+        this.nextTarget = this.findDirectionTarget(ship.hitPositions);
+      }
       this.lastHit = [x, y];
     } else {
+      // If no hit detected during the attack (sunk or miss), reset the hit state
       this.lastHit = null;
+      this.nextTarget = null;
     }
 
     return [x, y];
   }
 
-  // Get random coordinate
+  // Generate a random coordinate
   getRanCoordinate(min, max) {
     const x = Math.floor(Math.random() * (max - min + 1) + min);
     const y = Math.floor(Math.random() * (max - min + 1) + min);
@@ -83,25 +94,27 @@ export class Game {
     return [x, y];
   }
 
-  // Generate radom coordinate that hasn't been attacked yet
-  generateUniqueRanCoordinate(oppGameboard) {
+  // Use 'Target and Hunt' strategy for computer's attack
+  // Randomly search for a ship to hit
+  huntShip(oppGameboard) {
     let coordinate;
 
     while (true) {
-      coordinate = this.getRanCoordinate(0, 9);
+      coordinate = this.getRanCoordinate(0, 4);
 
       // Check if previous attack coordinate is in the Set
       // If not, break out the loop and return the new coordinate
-      if (!oppGameboard.hits.has(`${coordinate[0]},${coordinate[1]}`)) {
+      if (!oppGameboard.trackAttacks.has(`${coordinate[0]},${coordinate[1]}`)) {
         break;
       }
     }
     return coordinate;
   }
 
-  // Use 'Target and Hunt' strategy for computer's attack
   // Attack neighbor cells if last attack was a hit
-  targetAndHunt([x, y]) {
+  targetShip(coordinate) {
+    const [x, y] = coordinate;
+
     // Possible moves from the computer
     const directions = [
       [-1, 0], // up
@@ -110,26 +123,65 @@ export class Game {
       [0, 1], // right
     ];
 
-    // Add some unpredictability in which direction the cell will be attacked
-    const mixed = directions.sort(() => Math.random() - 0.5);
-
-    for (const [dx, dy] of mixed) {
+    for (const [dx, dy] of directions) {
       const sx = x + dx;
       const sy = y + dy;
 
-      // Stay within the boundaries of the board
-      if (sx >= 0 && sx <= 9 && sy >= 0 && sy <= 9) {
-        const coordinateKey = `${sx},${sy}`;
-
-        // If this position hasn't been attacked yet, return that adjacent position
-        if (!this.opponent.gameboard.hits.has(coordinateKey)) {
-          return [sx, sy];
-        }
+      // Check if it's valid to attack
+      if (this.isValidAttack(sx, sy)) {
+        return [sx, sy];
       }
     }
 
     // Fallback to a random attack if no adjacent cells can be targeted
-    return this.generateUniqueRanCoordinate(oppGameboard);
+    return this.huntShip(this.opponent.gameboard);
+  }
+
+  // Predict the ship's orientation for computer to attack the ship
+  findDirectionTarget(hitCoordinates) {
+    const [x1, y1] = hitCoordinates[0]; // First hit
+    const [x2, y2] = hitCoordinates[1]; // Second hit
+
+    let dx = 0;
+    let dy = 0;
+
+    if (x1 === x2) {
+      dy = y2 > y1 ? 1 : -1; // Horizontal ship (dy = 1 move right)
+    } else if (y1 === y2) {
+      dx = x2 > x1 ? 1 : -1; // Vertical ship (dx = 1 move down)
+    }
+
+    const [lastX, lastY] = hitCoordinates[hitCoordinates.length - 1]; // Last hit
+    const [firstX, firstY] = hitCoordinates[0]; // First hit
+
+    // Move in the direction based on the most recent hit
+    const forwardX = lastX + dx;
+    const forwardY = lastY + dy;
+
+    // Move backwards from the first hit in the opposite direction,
+    // Use case if forward direction is blocked ('miss' cell / edge of board)
+    const backX = firstX - dx;
+    const backY = firstY - dy;
+
+    // Return updated coordinates if the attack is possible
+    if (this.isValidAttack(forwardX, forwardY)) {
+      return [forwardX, forwardY];
+    }
+
+    if (this.isValidAttack(backX, backY)) {
+      return [backX, backY];
+    }
+  }
+
+  // Check if attack is within the boundaries and hasn't been attempted yet
+  isValidAttack(x, y) {
+    return (
+      x >= 0 &&
+      x <= 4 &&
+      y >= 0 &&
+      y <= 4 &&
+      !this.opponent.gameboard.trackAttacks.has(`${x},${y}`)
+    );
   }
 
   switchTurn() {
@@ -168,7 +220,7 @@ export class Game {
     }
   }
 
-  // Based on the cell state, mark it visually on the gameboard
+  // Retrieve the cell's state after player's move
   handleCellState(player, cell) {
     const [x, y] = getCoordinates(cell);
     const value = player.gameboard.board[x][y];
