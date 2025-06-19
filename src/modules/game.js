@@ -15,6 +15,7 @@ export class Game {
     this.computerInterval = null;
     this.lastHit = null; // Track the last hit of the ship
     this.nextTarget = null; // Get the next target of the attack
+    this.currTargetShip = null;
   }
 
   // Reflect the player's move visually
@@ -70,18 +71,7 @@ export class Game {
     const ship = this.opponent.gameboard.storeShip.get(keyCoordinate);
 
     this.opponent.gameboard.receiveAttack(x, y);
-
-    if (ship && !ship.isSunk()) {
-      // Predict the direction for ship attack, if at least 2 hits have been registered to the ship
-      if (ship.hitPositions.length >= 2) {
-        this.nextTarget = this.findDirectionTarget(ship.hitPositions);
-      }
-      this.lastHit = [x, y];
-    } else {
-      // If no hit detected during the attack (sunk or miss), reset the hit state
-      this.lastHit = null;
-      this.nextTarget = null;
-    }
+    this.updateAttackState(ship, x, y);
 
     return [x, y];
   }
@@ -123,7 +113,10 @@ export class Game {
       [0, 1], // right
     ];
 
-    for (const [dx, dy] of directions) {
+    // Mix up the direction to move
+    const mix = directions.sort(() => Math.random() - 0.5);
+
+    for (const [dx, dy] of mix) {
       const sx = x + dx;
       const sy = y + dy;
 
@@ -137,7 +130,37 @@ export class Game {
     return this.huntShip(this.opponent.gameboard);
   }
 
-  // Predict the ship's orientation for computer to attack the ship
+  // Update target state after computer's attack
+  updateAttackState(ship, x, y) {
+    const isHit = ship && !ship.isSunk();
+
+    // Check if previously attacked ship should continue being attacked
+    const resumePrevAttack =
+      this.currTargetShip &&
+      !this.currTargetShip.isSunk() &&
+      this.currTargetShip.hitPositions.length >= 2;
+
+    if (isHit) {
+      if (ship.hitPositions.length >= 2) {
+        // If 2+ hits registered, predict the ship's direction for the next attack
+        this.nextTarget = this.findDirectionTarget(ship.hitPositions);
+      }
+      this.lastHit = [x, y];
+      this.currTargetShip = ship; // Save the currently attacked ship
+    } else if (resumePrevAttack) {
+      // Continue to attack the ship from where it was last left off
+      this.nextTarget = this.findDirectionTarget(
+        this.currTargetShip.hitPositions,
+      );
+    } else {
+      // If its a miss or ship has sunk, reset all the targeting state
+      this.lastHit = null;
+      this.nextTarget = null;
+      this.currTargetShip = null;
+    }
+  }
+
+  // Predict the ship's direction for computer's attack
   findDirectionTarget(hitCoordinates) {
     const [x1, y1] = hitCoordinates[0]; // First hit
     const [x2, y2] = hitCoordinates[1]; // Second hit
@@ -159,11 +182,11 @@ export class Game {
     const forwardY = lastY + dy;
 
     // Move backwards from the first hit in the opposite direction,
-    // Use case if forward direction is blocked ('miss' cell / edge of board)
+    // Use case if forward direction is blocked ('miss' cell or edge of board)
     const backX = firstX - dx;
     const backY = firstY - dy;
 
-    // Return updated coordinates if the attack is possible
+    // Return the next valid target for computer to attack
     if (this.isValidAttack(forwardX, forwardY)) {
       return [forwardX, forwardY];
     }

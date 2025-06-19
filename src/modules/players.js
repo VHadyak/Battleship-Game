@@ -24,6 +24,7 @@ function placeShips(player) {
     [0, 1],
     [0, 2],
   ]);
+
   player.gameboard.placeShip(ship2, [
     [2, 2],
     [3, 2],
@@ -34,22 +35,21 @@ function placeShips(player) {
 placeShips(realPlayer);
 placeShips(computerPlayer);
 
-realPlayer.gameboard.receiveAttack(1, 2);
-realPlayer.gameboard.receiveAttack(0, 3);
 realPlayer.gameboard.receiveAttack(2, 0);
 realPlayer.gameboard.receiveAttack(3, 0);
 realPlayer.gameboard.receiveAttack(4, 0);
 realPlayer.gameboard.receiveAttack(2, 4);
 realPlayer.gameboard.receiveAttack(3, 4);
 realPlayer.gameboard.receiveAttack(4, 4);
-realPlayer.gameboard.receiveAttack(1, 1);
 realPlayer.gameboard.receiveAttack(1, 4);
 realPlayer.gameboard.receiveAttack(0, 4);
+realPlayer.gameboard.receiveAttack(1, 0);
 realPlayer.gameboard.receiveAttack(1, 1);
+realPlayer.gameboard.receiveAttack(2, 1);
+realPlayer.gameboard.receiveAttack(3, 1);
+realPlayer.gameboard.receiveAttack(4, 1);
+realPlayer.gameboard.receiveAttack(0, 3);
 realPlayer.gameboard.receiveAttack(1, 3);
 realPlayer.gameboard.receiveAttack(2, 3);
 realPlayer.gameboard.receiveAttack(3, 3);
-realPlayer.gameboard.receiveAttack(1, 0);
 realPlayer.gameboard.receiveAttack(4, 3);
-realPlayer.gameboard.receiveAttack(4, 1);
-realPlayer.gameboard.receiveAttack(3, 1);
