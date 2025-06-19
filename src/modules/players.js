@@ -42,11 +42,13 @@ realPlayer.gameboard.receiveAttack(2, 4);
 realPlayer.gameboard.receiveAttack(3, 4);
 realPlayer.gameboard.receiveAttack(4, 4);
 realPlayer.gameboard.receiveAttack(1, 4);
+
 realPlayer.gameboard.receiveAttack(0, 4);
 realPlayer.gameboard.receiveAttack(1, 0);
 realPlayer.gameboard.receiveAttack(1, 1);
 realPlayer.gameboard.receiveAttack(2, 1);
 realPlayer.gameboard.receiveAttack(3, 1);
+
 realPlayer.gameboard.receiveAttack(4, 1);
 realPlayer.gameboard.receiveAttack(0, 3);
 realPlayer.gameboard.receiveAttack(1, 3);
