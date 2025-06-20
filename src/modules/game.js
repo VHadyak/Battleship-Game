@@ -8,6 +8,7 @@ import {
 } from "./dom.js";
 
 import { AIController } from "./computerAI.js";
+import { PlaceShips } from "./shipPlacement.js";
 
 export class Game {
   constructor(realPlayer, computerPlayer) {
@@ -17,6 +18,9 @@ export class Game {
     this.opponent = computerPlayer;
     this.computerInterval = null;
     this.gameOver = false;
+
+    // new PlaceShips(this.player1).placePlayerShips(); // Player's ship placements (drag and drop)
+    new PlaceShips(this.player2).placeComputerShips(); // Computer's ship placements
 
     this.AI = new AIController(this.player1.gameboard); // Computer's AI
   }
