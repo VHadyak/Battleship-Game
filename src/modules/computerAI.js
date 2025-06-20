@@ -62,11 +62,7 @@ export class AIController {
     while (true) {
       coordinate = this.getRanCoordinate(0, this.boardSize - 1);
 
-      // Check if previous attack coordinate is in the Set
-      // If not, break out the loop and return the new coordinate
-      if (
-        !this.oppGameboard.trackAttacks.has(`${coordinate[0]},${coordinate[1]}`)
-      ) {
+      if (this.isValidAttack(coordinate[0], coordinate[1])) {
         break;
       }
     }

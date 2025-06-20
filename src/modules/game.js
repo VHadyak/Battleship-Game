@@ -1,5 +1,6 @@
 import {
   switchBoard,
+  displayWinner,
   getCoordinates,
   updateCellState,
   realPlayerBoardEl,
@@ -15,6 +16,7 @@ export class Game {
     this.currentPlayer = realPlayer;
     this.opponent = computerPlayer;
     this.computerInterval = null;
+    this.gameOver = false;
 
     this.AI = new AIController(this.player1.gameboard); // Computer's AI
   }
@@ -23,12 +25,20 @@ export class Game {
   processMoveResult(cell, boardElement) {
     this.handleCellState(cell);
     this.handleSunkShip(this.opponent, cell, boardElement);
+
+    // If there is a winner, end game
+    if (this.isWinner()) {
+      this.endGame();
+    }
   }
 
   handlePlayerMove(cell) {
     const [x, y] = getCoordinates(cell);
 
     this.opponent.gameboard.receiveAttack(x, y);
+
+    if (this.gameOver) return;
+
     this.processMoveResult(cell, computerPlayerBoardEl);
     this.switchTurn(); // Give turn to the computer
 
@@ -44,6 +54,8 @@ export class Game {
       `[data-row="${x}"][data-col="${y}"]`,
     );
 
+    if (this.gameOver) return;
+
     this.processMoveResult(cell, realPlayerBoardEl);
     this.switchTurn(); // Give turn back to the real player
 
@@ -53,13 +65,15 @@ export class Game {
   }
 
   switchTurn() {
-    this.currentPlayer =
-      this.currentPlayer === this.player1 ? this.player2 : this.player1;
+    if (!this.isWinner()) {
+      this.currentPlayer =
+        this.currentPlayer === this.player1 ? this.player2 : this.player1;
 
-    this.opponent =
-      this.currentPlayer === this.player1 ? this.player2 : this.player1;
+      this.opponent =
+        this.currentPlayer === this.player1 ? this.player2 : this.player1;
 
-    switchBoard(this.currentPlayer);
+      switchBoard(this.currentPlayer);
+    }
   }
 
   // Mark the ship that has been sunk
@@ -94,5 +108,19 @@ export class Game {
     const value = this.opponent.gameboard.board[x][y];
 
     updateCellState(value, cell);
+  }
+
+  // Check if there is a winner
+  isWinner() {
+    return this.opponent.gameboard.allSunk();
+  }
+
+  // End the game after the winner was found
+  endGame() {
+    this.gameOver = true;
+    clearInterval(this.computerInterval);
+    this.computerInterval = null;
+
+    displayWinner(this.currentPlayer);
   }
 }

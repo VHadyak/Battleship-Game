@@ -4,7 +4,7 @@ export const computerPlayerBoardEl = document.querySelector("#computer-board");
 
 // Create UI gameboard for both players
 export function renderBoard(gameboard, boardElement) {
-  const boardSize = 5;
+  const boardSize = 10;
   const board = gameboard.board;
 
   boardElement.innerHTML = ""; // Clear the board before rerendering
@@ -57,6 +57,25 @@ export function switchBoard(player) {
     computerPlayerBoardEl.classList.remove("disable");
     realPlayerBoardEl.classList.remove("transparent");
     realPlayerBoardEl.classList.add("disable");
+  }
+}
+
+// Display the winner
+export function displayWinner(winner) {
+  if (winner.isComputer) {
+    realPlayerBoardEl.classList.remove("disable");
+    computerPlayerBoardEl.classList.remove("transparent");
+
+    computerPlayerBoardEl.classList.add("disable");
+    realPlayerBoardEl.classList.add("transparent");
+    console.log("Computer won!");
+  } else {
+    realPlayerBoardEl.classList.remove("transparent");
+    computerPlayerBoardEl.classList.remove("disable");
+
+    realPlayerBoardEl.classList.add("disable");
+    computerPlayerBoardEl.classList.add("transparent");
+    console.log("Real Player won!");
   }
 }
 
