@@ -2,6 +2,9 @@
 
 :root {
   /* Custom CSS properties */
+  --board-size: 400px;
+  --grid-container-gap: 150px;
+  --cell-size: calc((var(--board-size) / 10) - 2px);
 }
 
 html {
@@ -27,25 +30,83 @@ body {
   justify-content: center;
 }
 
+.game-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 /* GAMEBOARD */
 .grid-container {
   display: flex;
-  gap: 200px;
+  gap: var(--grid-container-gap);
 }
 
 .board {
   display: flex;
   flex-direction: column;
-  height: 400px;
-  width: 400px;
+  height: var(--board-size);
+  width: var(--board-size);
+}
+
+.playerShips {
+  position: absolute;
+  right: calc(100% + 20px);
+  outline: 1px solid black;
+  width: 350px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+button.rotate-btn {
+  display: none;
+  position: fixed;
+  top: 30%;
+  width: 30px;
+  height: 30px;
+  margin-bottom: -20px;
+  cursor: pointer;
+}
+
+.ship-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+#ship1,
+#ship2,
+#ship3,
+#ship4,
+#ship5 {
+  width: fit-content;
+  display: flex;
+  border: 1px solid black;
+  cursor: grab;
+  gap: 1px;
+  transform-origin: center;
+}
+
+#ship1 > div.cell,
+#ship2 > div.cell,
+#ship3 > div.cell,
+#ship4 > div.cell,
+#ship5 > div.cell {
+  height: var(--cell-size);
+  width: var(--cell-size);
+  background-color: rgb(123, 10, 171);
 }
 
 #real-player-board {
-  border: 2px solid rgb(14, 154, 25);
+  border: 1px solid rgb(14, 154, 25);
 }
 
 #computer-board {
-  border: 2px solid rgb(228, 20, 20);
+  border: 1px solid rgb(228, 20, 20);
 }
 
 .row,

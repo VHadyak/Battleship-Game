@@ -2,6 +2,10 @@
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
 
+//const rotateBtn = document.querySelector(".rotate-btn");
+
+import { realPlayer } from "./players.js";
+
 // Create UI gameboard for both players
 export function renderBoard(gameboard, boardElement) {
   const boardSize = 10;
@@ -86,3 +90,98 @@ export function getCoordinates(cell) {
 
   return [x, y];
 }
+
+function enableDragAndDrop() {
+  let trackShipsSegment = 0;
+
+  // Get index of the ship's segment that the user clicked and is about to drag
+  document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
+    shipEl.addEventListener("mousedown", (e) => {
+      const segment = e.target.closest(".cell");
+      if (segment) {
+        trackShipsSegment = Number(segment.getAttribute("data-index"));
+      }
+    });
+
+    // Set drag data, to identify the dragged ship and the ship's segment offset
+    shipEl.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("offset", trackShipsSegment.toString());
+      e.dataTransfer.setData("shipID", e.target.id);
+    });
+  });
+
+  // Allow drops on the gameboard
+  realPlayerBoardEl.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  });
+}
+
+// Listen for player dropping a ship on the gameboard
+// Then calculate coordinates of the ship that was dropped
+export function setupPlayerShipDrop(callback) {
+  realPlayerBoardEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    let coordinates = [];
+
+    const cell = e.target;
+
+    // Coordinates of the cell on the board where ship was dropped
+    const row = Number(cell.getAttribute("data-row"));
+    const col = Number(cell.getAttribute("data-col"));
+
+    const shipData = e.dataTransfer.getData("shipID"); // Get the string of the ship that was dragged
+    const shipEl = document.getElementById(shipData);
+    const shipLength = Number(shipEl.getAttribute("data-length"));
+
+    // Index of the ship segment that was clicked
+    const offset = Number(e.dataTransfer.getData("offset"));
+
+    const orientation = shipEl.getAttribute("data-orientation") || "horizontal";
+
+    // Calculate coordinates of each each ship's segment
+    for (let i = 0; i < shipLength; i++) {
+      let x = row;
+      let y = col;
+
+      // Calculate segment positions so that the clicked ship segment aligns with the target cell on the board
+      if (orientation === "horizontal") {
+        y = col - offset + i;
+      } else {
+        x = row - offset + i;
+      }
+      coordinates.push([x, y]); // Store ships's coordinates
+    }
+
+    // Pass coordinates and length of each ship through callback for future use
+    callback(coordinates, shipLength, shipEl);
+
+    // Rerender the gameboard to update player's ship placements
+    renderBoard(realPlayer.gameboard, realPlayerBoardEl);
+  });
+}
+
+// Remove ship from side panel
+export function shipRemoval(ship) {
+  ship.style.transition = "opacity 0.3s";
+  ship.style.opacity = "0";
+  setTimeout(() => ship.parentElement.remove(), 300);
+}
+
+enableDragAndDrop();
+
+// Before dragging, create an option for user to change ship's orientation, and store its state for drag and drop
+/* 
+export function changeShipOrientation(shipID) {
+  const ship = document.querySelector(`#${shipID}`);
+  const shipWrapper = ship.parentElement;
+
+  const notRotated = shipRotationState[shipID] ?? false; // If state is undefined/null default it to false
+  const isRotated = !notRotated; // Toggle current rotation state
+
+  shipRotationState[shipID] = isRotated; // Store rotation state of the ship
+
+  // Rotate a ship with the button relative to it
+  ship.style.transform = isRotated ? "rotate(-90deg)" : "rotate(0deg)";
+} */

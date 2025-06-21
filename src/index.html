@@ -6,9 +6,82 @@
     <title>Battleship Game</title>
   </head>
   <body>
-    <div class="grid-container">
-      <div id="real-player-board" class="board disable"></div>
-      <div id="computer-board" class="board"></div>
+    <div class="game-wrapper">
+      <div class="playerShips">
+        <button type="button" class="rotate-btn"></button>
+        <div class="ship-wrapper">
+          <div
+            id="ship1"
+            draggable="true"
+            data-length="3"
+            data-orientation="horizontal"
+          >
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+          </div>
+        </div>
+
+        <div class="ship-wrapper">
+          <div
+            id="ship2"
+            draggable="true"
+            data-length="3"
+            data-orientation="horizontal"
+          >
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+          </div>
+        </div>
+
+        <div class="ship-wrapper">
+          <div
+            id="ship3"
+            draggable="true"
+            data-length="2"
+            data-orientation="horizontal"
+          >
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+          </div>
+        </div>
+
+        <div class="ship-wrapper">
+          <div
+            id="ship4"
+            draggable="true"
+            data-length="4"
+            data-orientation="horizontal"
+          >
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+          </div>
+        </div>
+
+        <div class="ship-wrapper">
+          <div
+            id="ship5"
+            draggable="true"
+            data-length="5"
+            data-orientation="horizontal"
+          >
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-container">
+        <!--add 'disable' class later on-->
+        <div id="real-player-board" class="board"></div>
+        <div id="computer-board" class="board"></div>
+      </div>
     </div>
   </body>
 </html>

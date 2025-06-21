@@ -1,17 +1,32 @@
 import { Ship } from "./ships.js";
+import { setupPlayerShipDrop, shipRemoval } from "./dom.js";
 
 const ships = [new Ship(3), new Ship(3), new Ship(2), new Ship(4), new Ship(5)];
 
 export class PlaceShips {
   constructor(player) {
-    this.ships = ships;
+    this.computerShips = ships;
     this.currentPlayer = player;
     this.board = player.gameboard.board;
     this.boardSize = player.gameboard.boardSize;
   }
 
+  // Listen for player's ship drop events
+  placePlayerShips() {
+    setupPlayerShipDrop((coordinates, shipLength, shipEl) => {
+      // If placement is valid, create and place the ship
+      if (this.validPlacement(coordinates)) {
+        const ship = new Ship(shipLength);
+        this.placeShipOnBoard(ship, coordinates);
+
+        // Remove ships from side panel only if valid placement on the board was found
+        shipRemoval(shipEl);
+      }
+    });
+  }
+
   placeComputerShips() {
-    for (const ship of this.ships) {
+    for (const ship of this.computerShips) {
       let placed = false;
 
       while (!placed) {
@@ -41,7 +56,7 @@ export class PlaceShips {
   // Check if the cells are not occupied and not adjacent to ships
   validPlacement(coordinates) {
     return coordinates.every(([x, y]) => {
-      if (!this.inBounds(x, y) && this.board[x][y] === "■") return false; // Current cell is occupied, invalidate placement
+      if (!this.inBounds(x, y) || this.board[x][y] === "■") return false; // Current cell is occupied, invalidate placement
 
       const adjacentOffset = [
         [-1, 0],
