@@ -91,32 +91,6 @@ export function getCoordinates(cell) {
   return [x, y];
 }
 
-function enableDragAndDrop() {
-  let trackShipsSegment = 0;
-
-  // Get index of the ship's segment that the user clicked and is about to drag
-  document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
-    shipEl.addEventListener("mousedown", (e) => {
-      const segment = e.target.closest(".cell");
-      if (segment) {
-        trackShipsSegment = Number(segment.getAttribute("data-index"));
-      }
-    });
-
-    // Set drag data, to identify the dragged ship and the ship's segment offset
-    shipEl.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("offset", trackShipsSegment.toString());
-      e.dataTransfer.setData("shipID", e.target.id);
-    });
-  });
-
-  // Allow drops on the gameboard
-  realPlayerBoardEl.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  });
-}
-
 // Listen for player dropping a ship on the gameboard
 // Then calculate coordinates of the ship that was dropped
 export function setupPlayerShipDrop(callback) {
@@ -164,11 +138,59 @@ export function setupPlayerShipDrop(callback) {
 
 // Remove ship from side panel
 export function shipRemoval(ship) {
-  ship.style.transition = "opacity 0.3s";
+  ship.style.maxHeight = "0";
   ship.style.opacity = "0";
-  setTimeout(() => ship.parentElement.remove(), 300);
+  setTimeout(() => ship.remove(), 300);
 }
 
+function enableDragAndDrop() {
+  // Get index of the ship's segment that the user clicked and is about to drag
+  document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
+    let trackShipsSegment = 0;
+
+    shipEl.addEventListener("mousedown", (e) => {
+      shipEl.style.cursor = "pointer";
+      const segment = e.target.closest(".cell");
+      if (segment) {
+        trackShipsSegment = Number(segment.getAttribute("data-index"));
+      }
+    });
+
+    // Set drag data, to identify the dragged ship and the ship's segment offset
+    shipEl.addEventListener("dragstart", (e) => {
+      shipEl.style.cursor = "grab";
+      e.dataTransfer.setData("offset", trackShipsSegment.toString());
+      e.dataTransfer.setData("shipID", e.target.id);
+    });
+
+    shipEl.addEventListener("dragend", () => {
+      shipEl.style.cursor = "pointer";
+    });
+  });
+
+  // Allow drops on the gameboard
+  realPlayerBoardEl.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  });
+}
+
+// Visually select the ship to drag
+function highlightShipSelection() {
+  document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
+    shipEl.addEventListener("mousedown", (e) => {
+      const ship = e.target.closest("[id^='ship']");
+
+      document.querySelectorAll(".highlightShip").forEach((el) => {
+        el.classList.remove("highlightShip");
+      });
+
+      ship.classList.add("highlightShip");
+    });
+  });
+}
+
+highlightShipSelection();
 enableDragAndDrop();
 
 // Before dragging, create an option for user to change ship's orientation, and store its state for drag and drop

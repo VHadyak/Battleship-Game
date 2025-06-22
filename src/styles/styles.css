@@ -62,6 +62,7 @@ body {
   gap: 40px;
 }
 
+/* Rotate ship button */
 button.rotate-btn {
   display: none;
   position: fixed;
@@ -78,6 +79,7 @@ button.rotate-btn {
   align-items: flex-start;
 }
 
+/* Ships */
 #ship1,
 #ship2,
 #ship3,
@@ -85,10 +87,16 @@ button.rotate-btn {
 #ship5 {
   width: fit-content;
   display: flex;
-  border: 1px solid black;
-  cursor: grab;
+  cursor: pointer;
   gap: 1px;
   transform-origin: center;
+  max-height: 50px;
+
+  /* Shift transition remaining ships within the panel after ship has been removed */
+  overflow: hidden;
+  transition:
+    opacity 0.3s ease,
+    max-height 0.3s ease;
 }
 
 #ship1 > div.cell,
@@ -109,6 +117,7 @@ button.rotate-btn {
   border: 1px solid rgb(228, 20, 20);
 }
 
+/* Gameboard cells */
 .row,
 .column {
   display: flex;
@@ -130,6 +139,7 @@ button.rotate-btn {
   pointer-events: none;
 }
 
+/* CUSTOM CLASS STYLES */
 /* Disable the board */
 .disable {
   background-color: rgb(197, 194, 194);
@@ -156,6 +166,10 @@ button.rotate-btn {
 
 .sunk {
   background-color: chartreuse;
+}
+
+[id^="ship"].highlightShip {
+  outline: 2px solid rgb(227, 27, 27);
 }
 
 @media (prefers-reduced-motion: no-preference) {
