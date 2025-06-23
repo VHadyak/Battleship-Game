@@ -93,13 +93,32 @@ export function getCoordinates(cell) {
   return [x, y];
 }
 
+// Calculate coordinates with offset for precised alignment on the board
+function calcShipCoordinatesOnBoard(row, col, shipEl, offset) {
+  const shipLength = Number(shipEl.getAttribute("data-length"));
+  const orientation = shipEl.getAttribute("data-orientation");
+  const coordinates = [];
+
+  for (let i = 0; i < shipLength; i++) {
+    let x = row;
+    let y = col;
+
+    // Calculate coordinates of each each ship's segment
+    if (orientation === "horizontal") {
+      y = col - offset + i;
+    } else {
+      x = row - offset + i;
+    }
+    coordinates.push([x, y]); // Store ships's coordinates
+  }
+  return coordinates;
+}
+
 // Listen for player dropping a ship on the gameboard
 // Then calculate coordinates of the ship that was dropped
 export function setupPlayerShipDrop(callback) {
   realPlayerBoardEl.addEventListener("drop", (e) => {
     e.preventDefault();
-
-    let coordinates = [];
 
     const cell = e.target;
 
@@ -111,24 +130,8 @@ export function setupPlayerShipDrop(callback) {
     const shipEl = document.getElementById(shipData);
     const shipLength = Number(shipEl.getAttribute("data-length"));
 
-    // Index of the ship segment that was clicked
-    const offset = Number(e.dataTransfer.getData("offset"));
-
-    const orientation = shipEl.getAttribute("data-orientation") || "horizontal";
-
-    // Calculate coordinates of each each ship's segment
-    for (let i = 0; i < shipLength; i++) {
-      let x = row;
-      let y = col;
-
-      // Calculate segment positions so that the clicked ship segment aligns with the target cell on the board
-      if (orientation === "horizontal") {
-        y = col - offset + i;
-      } else {
-        x = row - offset + i;
-      }
-      coordinates.push([x, y]); // Store ships's coordinates
-    }
+    const offset = Number(e.dataTransfer.getData("offset")); // Index of the ship segment that was clicked
+    const coordinates = calcShipCoordinatesOnBoard(row, col, shipEl, offset);
 
     // Pass coordinates and length of each ship through callback for future use
     callback(coordinates, shipLength, shipEl);
@@ -169,10 +172,13 @@ function enableDragAndDrop() {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
 
+    // Reset highlighting and disable rotate button
     document.querySelectorAll(".highlightShip").forEach((el) => {
       el.classList.remove("highlightShip");
     });
     rotateBtn.classList.remove("enableRotate");
+
+    // Add hover effect
   });
 }
 
