@@ -2,7 +2,9 @@
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
 
-//const rotateBtn = document.querySelector(".rotate-btn");
+const rotateBtn = document.querySelector(".rotate-btn");
+
+let shipRotationState = {};
 
 import { realPlayer } from "./players.js";
 
@@ -149,7 +151,6 @@ function enableDragAndDrop() {
     let trackShipsSegment = 0;
 
     shipEl.addEventListener("mousedown", (e) => {
-      shipEl.style.cursor = "pointer";
       const segment = e.target.closest(".cell");
       if (segment) {
         trackShipsSegment = Number(segment.getAttribute("data-index"));
@@ -158,13 +159,8 @@ function enableDragAndDrop() {
 
     // Set drag data, to identify the dragged ship and the ship's segment offset
     shipEl.addEventListener("dragstart", (e) => {
-      shipEl.style.cursor = "grab";
       e.dataTransfer.setData("offset", trackShipsSegment.toString());
-      e.dataTransfer.setData("shipID", e.target.id);
-    });
-
-    shipEl.addEventListener("dragend", () => {
-      shipEl.style.cursor = "pointer";
+      e.dataTransfer.setData("shipID", shipEl.id);
     });
   });
 
@@ -172,6 +168,11 @@ function enableDragAndDrop() {
   realPlayerBoardEl.addEventListener("dragover", (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+
+    document.querySelectorAll(".highlightShip").forEach((el) => {
+      el.classList.remove("highlightShip");
+    });
+    rotateBtn.classList.remove("enableRotate");
   });
 }
 
@@ -181,29 +182,40 @@ function highlightShipSelection() {
     shipEl.addEventListener("mousedown", (e) => {
       const ship = e.target.closest("[id^='ship']");
 
+      // Remove each highlighter before processing the new one
       document.querySelectorAll(".highlightShip").forEach((el) => {
         el.classList.remove("highlightShip");
       });
 
       ship.classList.add("highlightShip");
+      rotateBtn.classList.add("enableRotate");
     });
   });
 }
 
+// Create an option for user to change ship's orientation, and store its state for drag and drop
+function changeShipOrientation() {
+  rotateBtn.addEventListener("click", () => {
+    const selectedShip = document.querySelector("[id^='ship'].highlightShip");
+    if (!selectedShip) return;
+
+    const selectedShipID = selectedShip.id;
+
+    const wasRotated = shipRotationState[selectedShipID] ?? false; // If state is undefined/null default it to false (horizontal)
+    const isRotated = !wasRotated; // Toggle current rotation state
+
+    shipRotationState[selectedShipID] = isRotated; // Store current rotation state of the ship
+
+    if (isRotated) {
+      selectedShip.setAttribute("data-orientation", "vertical");
+      selectedShip.classList.add("rotated");
+    } else {
+      selectedShip.setAttribute("data-orientation", "horizontal");
+      selectedShip.classList.remove("rotated");
+    }
+  });
+}
+
 highlightShipSelection();
+changeShipOrientation();
 enableDragAndDrop();
-
-// Before dragging, create an option for user to change ship's orientation, and store its state for drag and drop
-/* 
-export function changeShipOrientation(shipID) {
-  const ship = document.querySelector(`#${shipID}`);
-  const shipWrapper = ship.parentElement;
-
-  const notRotated = shipRotationState[shipID] ?? false; // If state is undefined/null default it to false
-  const isRotated = !notRotated; // Toggle current rotation state
-
-  shipRotationState[shipID] = isRotated; // Store rotation state of the ship
-
-  // Rotate a ship with the button relative to it
-  ship.style.transform = isRotated ? "rotate(-90deg)" : "rotate(0deg)";
-} */

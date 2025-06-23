@@ -2,9 +2,9 @@
 
 :root {
   /* Custom CSS properties */
-  --board-size: 400px;
+  --board-size: 300px;
   --grid-container-gap: 150px;
-  --cell-size: calc((var(--board-size) / 10) - 2px);
+  --cell-size: calc((var(--board-size) / 10) - 1px);
 }
 
 html {
@@ -54,7 +54,7 @@ body {
   right: calc(100% + 20px);
   outline: 1px solid black;
   width: 350px;
-  height: 500px;
+  height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -64,19 +64,14 @@ body {
 
 /* Rotate ship button */
 button.rotate-btn {
-  display: none;
+  pointer-events: none;
+  opacity: 0.5;
   position: fixed;
   top: 30%;
   width: 30px;
   height: 30px;
-  margin-bottom: -20px;
+  margin-top: -40px;
   cursor: pointer;
-}
-
-.ship-wrapper {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
 }
 
 /* Ships */
@@ -85,12 +80,11 @@ button.rotate-btn {
 #ship3,
 #ship4,
 #ship5 {
-  width: fit-content;
   display: flex;
   cursor: pointer;
   gap: 1px;
   transform-origin: center;
-  max-height: 50px;
+  max-height: 190px;
 
   /* Shift transition remaining ships within the panel after ship has been removed */
   overflow: hidden;
@@ -99,6 +93,7 @@ button.rotate-btn {
     max-height 0.3s ease;
 }
 
+/* Remove later */
 #ship1 > div.cell,
 #ship2 > div.cell,
 #ship3 > div.cell,
@@ -170,6 +165,15 @@ button.rotate-btn {
 
 [id^="ship"].highlightShip {
   outline: 2px solid rgb(227, 27, 27);
+}
+
+.rotated {
+  flex-direction: column;
+}
+
+button.enableRotate {
+  opacity: 1;
+  pointer-events: all;
 }
 
 @media (prefers-reduced-motion: no-preference) {
