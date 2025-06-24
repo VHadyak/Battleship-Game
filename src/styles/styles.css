@@ -2,7 +2,7 @@
 
 :root {
   /* Custom CSS properties */
-  --board-size: 300px;
+  --board-size: 400px;
   --grid-container-gap: 150px;
   --cell-size: calc((var(--board-size) / 10) - 1px);
 }
@@ -169,6 +169,14 @@ button.rotate-btn {
 
 .rotated {
   flex-direction: column;
+}
+
+.hovered {
+  background-color: green;
+}
+
+.invalid {
+  background-color: red;
 }
 
 button.enableRotate {

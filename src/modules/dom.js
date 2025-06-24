@@ -2,11 +2,16 @@
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
 
+import { realPlayer } from "./players.js";
+
 const rotateBtn = document.querySelector(".rotate-btn");
 
 let shipRotationState = {};
 
-import { realPlayer } from "./players.js";
+// Track the id of the ship that currently being dragged, and ship segment
+// since dragover event can't access dataTransfer.getData() due to browser security restrictions
+let currentDraggedShipId = null;
+let currentSegmentOffset = 0;
 
 // Create UI gameboard for both players
 export function renderBoard(gameboard, boardElement) {
@@ -93,10 +98,76 @@ export function getCoordinates(cell) {
   return [x, y];
 }
 
+// Listen for player dropping a ship on the gameboard
+// Then calculate coordinates of the ship that was dropped
+export function setupPlayerShipDrop(callback, isValidPlacement) {
+  realPlayerBoardEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    const { row, col, shipEl, offset, shipLength } = getShipData(e);
+    const coordinates = calcShipCoordinatesOnBoard(row, col, shipEl, offset);
+
+    // Pass coordinates and length of each ship through callback for future use
+    callback(coordinates, shipLength, shipEl);
+
+    // Rerender the gameboard to update player's ship placements
+    renderBoard(realPlayer.gameboard, realPlayerBoardEl);
+  });
+
+  // Allow drops on the gameboard
+  realPlayerBoardEl.addEventListener("dragover", (e) => {
+    e.preventDefault();
+
+    // Reset highlighting and disable rotate button
+    document.querySelectorAll(".highlightShip").forEach((el) => {
+      el.classList.remove("highlightShip");
+    });
+    rotateBtn.classList.remove("enableRotate");
+
+    hoverShipPlacementEffect(e, isValidPlacement);
+  });
+
+  // Remove hovers when drag leaves the board
+  realPlayerBoardEl.addEventListener("dragleave", () => {
+    document.querySelectorAll(".hovered").forEach((cell) => {
+      cell.classList.remove("hovered", "invalid");
+    });
+  });
+}
+
+// Remove ship from side panel
+export function shipRemoval(ship) {
+  ship.style.maxHeight = "0";
+  ship.style.opacity = "0";
+  setTimeout(() => ship.remove(), 300);
+}
+
+function getShipData(e) {
+  const cell = e.target;
+
+  // Coordinates of the cell on the board where ship was dropped
+  const row = Number(cell.getAttribute("data-row"));
+  const col = Number(cell.getAttribute("data-col"));
+  const shipId = e.dataTransfer.getData("shipID"); // Get the string of the ship that was dragged
+
+  // Fallback to global variable if shipEl from dataTransfer is null
+  const shipEl =
+    document.getElementById(shipId) ??
+    document.getElementById(currentDraggedShipId);
+
+  const shipLength = Number(shipEl.getAttribute("data-length"));
+
+  // Use dataTransfer offset if possible, fallback to global one
+  const offsetData = e.dataTransfer.getData("offset");
+  const offset = offsetData !== "" ? Number(offsetData) : currentSegmentOffset;
+
+  return { row, col, shipEl, offset, shipLength };
+}
+
 // Calculate coordinates with offset for precised alignment on the board
 function calcShipCoordinatesOnBoard(row, col, shipEl, offset) {
-  const shipLength = Number(shipEl.getAttribute("data-length"));
   const orientation = shipEl.getAttribute("data-orientation");
+  const shipLength = Number(shipEl.getAttribute("data-length"));
   const coordinates = [];
 
   for (let i = 0; i < shipLength; i++) {
@@ -114,41 +185,7 @@ function calcShipCoordinatesOnBoard(row, col, shipEl, offset) {
   return coordinates;
 }
 
-// Listen for player dropping a ship on the gameboard
-// Then calculate coordinates of the ship that was dropped
-export function setupPlayerShipDrop(callback) {
-  realPlayerBoardEl.addEventListener("drop", (e) => {
-    e.preventDefault();
-
-    const cell = e.target;
-
-    // Coordinates of the cell on the board where ship was dropped
-    const row = Number(cell.getAttribute("data-row"));
-    const col = Number(cell.getAttribute("data-col"));
-
-    const shipData = e.dataTransfer.getData("shipID"); // Get the string of the ship that was dragged
-    const shipEl = document.getElementById(shipData);
-    const shipLength = Number(shipEl.getAttribute("data-length"));
-
-    const offset = Number(e.dataTransfer.getData("offset")); // Index of the ship segment that was clicked
-    const coordinates = calcShipCoordinatesOnBoard(row, col, shipEl, offset);
-
-    // Pass coordinates and length of each ship through callback for future use
-    callback(coordinates, shipLength, shipEl);
-
-    // Rerender the gameboard to update player's ship placements
-    renderBoard(realPlayer.gameboard, realPlayerBoardEl);
-  });
-}
-
-// Remove ship from side panel
-export function shipRemoval(ship) {
-  ship.style.maxHeight = "0";
-  ship.style.opacity = "0";
-  setTimeout(() => ship.remove(), 300);
-}
-
-function enableDragAndDrop() {
+function enableShipDragging() {
   // Get index of the ship's segment that the user clicked and is about to drag
   document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
     let trackShipsSegment = 0;
@@ -162,24 +199,42 @@ function enableDragAndDrop() {
 
     // Set drag data, to identify the dragged ship and the ship's segment offset
     shipEl.addEventListener("dragstart", (e) => {
+      // ! Use these due to dragover event not able to access this data through e.dataTransfer.getData()
+      currentDraggedShipId = shipEl.id;
+      currentSegmentOffset = trackShipsSegment;
+
+      // Store it in dataTransfer if no fallback is required
       e.dataTransfer.setData("offset", trackShipsSegment.toString());
       e.dataTransfer.setData("shipID", shipEl.id);
     });
   });
+}
 
-  // Allow drops on the gameboard
-  realPlayerBoardEl.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+// Visually show hover effect for potential ship placement on the gameboard
+function hoverShipPlacementEffect(e, isValidPlacement) {
+  const { row, col, shipEl, offset } = getShipData(e);
+  const coordinates = calcShipCoordinatesOnBoard(row, col, shipEl, offset);
+  const isValid = isValidPlacement(coordinates);
 
-    // Reset highlighting and disable rotate button
-    document.querySelectorAll(".highlightShip").forEach((el) => {
-      el.classList.remove("highlightShip");
-    });
-    rotateBtn.classList.remove("enableRotate");
-
-    // Add hover effect
+  // Remove previous hover and invalid styling
+  document.querySelectorAll(".hovered").forEach((cell) => {
+    cell.classList.remove("hovered", "invalid");
   });
+
+  coordinates.forEach(([x, y]) => {
+    // Get the cell at current ship coordinate
+    const cell = realPlayerBoardEl.querySelector(
+      `[data-row="${x}"][data-col="${y}"]`,
+    );
+
+    if (cell) {
+      cell.classList.add("hovered");
+      // If placement of ship is invalid during hover, apply it visually
+      if (!isValid) cell.classList.add("invalid");
+    }
+  });
+
+  e.dataTransfer.dropEffect = isValid ? "move" : "none";
 }
 
 // Visually select the ship to drag
@@ -224,4 +279,4 @@ function changeShipOrientation() {
 
 highlightShipSelection();
 changeShipOrientation();
-enableDragAndDrop();
+enableShipDragging();

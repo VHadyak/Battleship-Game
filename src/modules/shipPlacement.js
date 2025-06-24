@@ -1,28 +1,32 @@
 import { Ship } from "./ships.js";
 import { setupPlayerShipDrop, shipRemoval } from "./dom.js";
 
-const ships = [new Ship(3), new Ship(3), new Ship(2), new Ship(4), new Ship(5)];
-
 export class PlaceShips {
   constructor(player) {
-    this.computerShips = ships;
+    this.computerShips = [
+      new Ship(3),
+      new Ship(3),
+      new Ship(2),
+      new Ship(4),
+      new Ship(5),
+    ];
     this.currentPlayer = player;
     this.board = player.gameboard.board;
     this.boardSize = player.gameboard.boardSize;
   }
 
-  // Listen for player's ship drop events
   placePlayerShips() {
+    // Listen for player's ship drop events
     setupPlayerShipDrop((coordinates, shipLength, shipEl) => {
-      // If placement is valid, create and place the ship
+      // If placement is valid, create and place a ship
       if (this.validPlacement(coordinates)) {
         const ship = new Ship(shipLength);
         this.placeShipOnBoard(ship, coordinates);
 
-        // Remove ships from side panel only if valid placement on the board was found
+        // Remove ships from side panel only if the placement is valid
         shipRemoval(shipEl);
       }
-    });
+    }, this.validPlacement.bind(this)); // Pass validPlacement method for hover use in DOM
   }
 
   placeComputerShips() {
