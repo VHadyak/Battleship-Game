@@ -124,9 +124,14 @@ button.rotate-btn {
 }
 
 /* Exclude hover effect over miss and hit cells */
-.column:not(.miss, .hit):hover {
+#computer-board .column:not(.miss, .hit):hover {
   background-color: rgb(188, 181, 173);
   cursor: pointer;
+}
+
+#real-player-board .column:not(.ship):hover {
+  background-color: transparent;
+  cursor: default;
 }
 
 /* Disable clicking over miss and hit cells */

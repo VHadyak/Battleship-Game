@@ -1,6 +1,7 @@
 // Player board elements
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
+const shipDragPanel = document.querySelector(".playerShips");
 
 import { realPlayer } from "./players.js";
 
@@ -15,7 +16,7 @@ let currentSegmentOffset = 0;
 
 // Create UI gameboard for both players
 export function renderBoard(gameboard, boardElement) {
-  const boardSize = 10;
+  const boardSize = 5;
   const board = gameboard.board;
 
   boardElement.innerHTML = ""; // Clear the board before rerendering
@@ -60,14 +61,20 @@ export function updateCellState(value, cell) {
 }
 
 // Switch boards based on player's turn
-export function switchBoard(player) {
+export function switchBoard(player, playerReady = true) {
   if (player.isComputer) {
     realPlayerBoardEl.classList.add("transparent");
     computerPlayerBoardEl.classList.add("disable");
   } else {
     computerPlayerBoardEl.classList.remove("disable");
+    computerPlayerBoardEl.classList.remove("transparent");
     realPlayerBoardEl.classList.remove("transparent");
     realPlayerBoardEl.classList.add("disable");
+  }
+
+  // Condition when computer places ships
+  if (player.isComputer && !playerReady) {
+    computerPlayerBoardEl.classList.add("transparent");
   }
 }
 

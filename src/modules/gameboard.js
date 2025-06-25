@@ -4,7 +4,7 @@ export class Gameboard {
     this.storeShip = new Map(); // Track each ship's coordinates within the board
     this.missedHits = []; // Store all of the coordinates of missed hits
     this.trackAttacks = new Set(); // Store only non-duplicate attacks
-    this.boardSize = 10;
+    this.boardSize = 5;
   }
 
   // Create a 10x10 board

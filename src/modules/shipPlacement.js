@@ -1,18 +1,25 @@
 import { Ship } from "./ships.js";
-import { setupPlayerShipDrop, shipRemoval } from "./dom.js";
+import {
+  setupPlayerShipDrop,
+  shipRemoval,
+  enableBoard,
+  switchBoard,
+} from "./dom.js";
+import { realPlayer, computerPlayer } from "./players.js";
 
 export class PlaceShips {
   constructor(player) {
     this.computerShips = [
-      new Ship(3),
-      new Ship(3),
+      //new Ship(3),
+      //new Ship(3),
       new Ship(2),
       new Ship(4),
-      new Ship(5),
+      //new Ship(5),
     ];
     this.currentPlayer = player;
     this.board = player.gameboard.board;
     this.boardSize = player.gameboard.boardSize;
+    this.computerInterval = null;
   }
 
   placePlayerShips() {
@@ -55,6 +62,22 @@ export class PlaceShips {
   // Place each ship with its coordinates on the gameboard
   placeShipOnBoard(ship, coordinates) {
     this.currentPlayer.gameboard.placeShip(ship, coordinates);
+
+    // If player finished placing ships, now its computer's turn
+    if (this.allPlaced()) {
+      this.computerInterval = setInterval(() => {
+        console.log("Computer strategically placing ships");
+        // When computer placing ships, disable the board and set ready state to false
+        switchBoard(computerPlayer, false);
+      }, 1000);
+
+      setTimeout(() => {
+        clearInterval(this.computerInterval);
+        this.computerInterval = null;
+        // After computer finished placing ships, switch boards so real player goes first
+        switchBoard(this.currentPlayer);
+      }, 5000);
+    }
   }
 
   // Check if the cells are not occupied and not adjacent to ships
@@ -115,5 +138,12 @@ export class PlaceShips {
     const shipY = Math.floor(Math.random() * maxY);
 
     return [shipX, shipY];
+  }
+
+  // Check if all player ships haven been placed
+  allPlaced() {
+    const requiredShips = 2;
+    const placedShips = new Set(realPlayer.gameboard.storeShip.values()).size;
+    return placedShips === requiredShips;
   }
 }
