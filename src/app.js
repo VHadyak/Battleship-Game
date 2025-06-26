@@ -9,7 +9,8 @@ import {
 import { realPlayer, computerPlayer } from "./modules/players.js";
 import { Game } from "./modules/game.js";
 
-const game = new Game(realPlayer, computerPlayer);
+export const game = new Game(realPlayer, computerPlayer);
+game.startSetup();
 
 // Render the game boards for 2 players
 renderBoard(realPlayer.gameboard, realPlayerBoardEl);

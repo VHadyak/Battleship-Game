@@ -1,11 +1,13 @@
 // Player board elements
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
-const shipDragPanel = document.querySelector(".playerShips");
 
 import { realPlayer } from "./players.js";
+import { game } from "../app.js";
 
 const rotateBtn = document.querySelector(".rotate-btn");
+const randomBtn = document.querySelector(".random-btn");
+const ships = document.querySelectorAll(".shipWrapper");
 
 let shipRotationState = {};
 
@@ -284,6 +286,29 @@ function changeShipOrientation() {
   });
 }
 
+// Besides drag and drop, create an option for player to randomize the ship placements
+function setUpRandomPlacement() {
+  randomBtn.addEventListener("click", () => {
+    if (game.playerShipPlacer.allPlaced()) return;
+    realPlayer.gameboard.resetBoard();
+
+    // Randomize placement
+    game.playerShipPlacer.placeComputerShips();
+
+    // Remove ships from the side panel
+    ships.forEach((ship) => {
+      shipRemoval(ship);
+    });
+
+    // Rerender player's gameboard after placement
+    renderBoard(realPlayer.gameboard, realPlayerBoardEl);
+
+    randomBtn.disabled = true;
+    randomBtn.style.cursor = "default";
+  });
+}
+
+setUpRandomPlacement();
 highlightShipSelection();
 changeShipOrientation();
 enableShipDragging();

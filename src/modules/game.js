@@ -1,4 +1,5 @@
 import {
+  renderBoard,
   switchBoard,
   displayWinner,
   getCoordinates,
@@ -16,13 +17,43 @@ export class Game {
     this.player2 = computerPlayer;
     this.currentPlayer = realPlayer;
     this.opponent = computerPlayer;
-    this.computerInterval = null;
+    this.turnInterval = null;
+    this.waitForPlayerInterval = null;
     this.gameOver = false;
 
-    new PlaceShips(this.player1).placePlayerShips(); // Player's ship placements (drag and drop)
-    new PlaceShips(this.player2).placeComputerShips(); // Computer's ship placements
+    this.playerShipPlacer = new PlaceShips(this.player1);
+    this.computerShipPlacer = new PlaceShips(this.player2);
 
     this.AI = new AIController(this.player1.gameboard); // Computer's AI
+  }
+
+  // Player must place ships first before the computer can
+  startSetup() {
+    // Player's ship placements (drag and drop)
+    this.playerShipPlacer.placePlayerShips();
+
+    // Wait for real player to place all their ships
+    this.waitForPlayerInterval = setInterval(() => {
+      if (this.playerShipPlacer.allPlaced()) {
+        clearInterval(this.waitForPlayerInterval);
+        console.log("Computer placing ships");
+
+        // Temporarily focus on computer's board when its making a decision
+        switchBoard(this.player2, false);
+
+        // Computer done placing ships
+        setTimeout(() => {
+          console.log("✅ Computer done — placing ships");
+
+          // Computer's ship placements
+          this.computerShipPlacer.placeComputerShips();
+
+          // Rerender computer's board (with ships) and switch to real player for their first attack move
+          renderBoard(this.player2.gameboard, computerPlayerBoardEl);
+          switchBoard(this.player1);
+        }, 5000);
+      }
+    }, 1000);
   }
 
   // Reflect the player's move visually
@@ -46,10 +77,10 @@ export class Game {
     this.processMoveResult(cell, computerPlayerBoardEl);
     this.switchTurn(); // Give turn to the computer
 
-    clearInterval(this.computerInterval); // Clear any existing intervals
+    clearInterval(this.turnInterval); // Clear any existing intervals
 
     // Set up an interval simulating computer's thinking
-    this.computerInterval = setInterval(() => this.handleComputerMove(), 6000);
+    this.turnInterval = setInterval(() => this.handleComputerMove(), 6000);
   }
 
   handleComputerMove() {
@@ -64,8 +95,8 @@ export class Game {
     this.switchTurn(); // Give turn back to the real player
 
     // Reset interval completely after computer has attacked
-    clearInterval(this.computerInterval);
-    this.computerInterval = null;
+    clearInterval(this.turnInterval);
+    this.turnInterval = null;
   }
 
   switchTurn() {
@@ -122,8 +153,8 @@ export class Game {
   // End the game after the winner was found
   endGame() {
     this.gameOver = true;
-    clearInterval(this.computerInterval);
-    this.computerInterval = null;
+    clearInterval(this.turnInterval);
+    this.turnInterval = null;
 
     displayWinner(this.currentPlayer);
   }

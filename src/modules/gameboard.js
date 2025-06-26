@@ -55,4 +55,15 @@ export class Gameboard {
     }
     return true;
   }
+
+  // Reset the board
+  resetBoard() {
+    for (let i = 0; i < this.boardSize; i++) {
+      this.board[i].fill("0");
+    }
+
+    this.storeShip.clear();
+    this.trackAttacks.clear();
+    this.missedHits = [];
+  }
 }
