@@ -6,6 +6,7 @@ import {
   updateCellState,
   realPlayerBoardEl,
   computerPlayerBoardEl,
+  setupPlayAgainBtn,
 } from "./dom.js";
 
 import { AIController } from "./computerAI.js";
@@ -157,5 +158,27 @@ export class Game {
     this.turnInterval = null;
 
     displayWinner(this.currentPlayer);
+    setupPlayAgainBtn();
+  }
+
+  // Full reset of the game
+  reset() {
+    this.gameOver = false;
+    this.currentPlayer = this.player1;
+    this.opponent = this.player2;
+
+    if (this.turnInterval) clearInterval(this.turnInterval);
+    if (this.waitForPlayerInterval) clearInterval(this.waitForPlayerInterval);
+
+    this.turnInterval = null;
+    this.waitForPlayerInterval = null;
+
+    this.player1.gameboard.resetBoard();
+    this.player2.gameboard.resetBoard();
+
+    this.playerShipPlacer = new PlaceShips(this.player1);
+    this.computerShipPlacer = new PlaceShips(this.player2);
+
+    this.AI = new AIController(this.player1.gameboard);
   }
 }

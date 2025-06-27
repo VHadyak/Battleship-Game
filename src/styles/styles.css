@@ -64,8 +64,6 @@ body {
 
 /* Rotate ship button */
 button.rotate-btn {
-  pointer-events: none;
-  opacity: 0.5;
   position: fixed;
   top: 30%;
   width: 30px;
@@ -78,6 +76,13 @@ button.random-btn {
   width: 30px;
   height: 30px;
   cursor: pointer;
+}
+
+button.restart-btn {
+  width: 100px;
+  height: 30px;
+  cursor: pointer;
+  display: none;
 }
 
 /* Ships */

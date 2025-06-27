@@ -1,13 +1,13 @@
 import { Ship } from "./ships.js";
-import { setupPlayerShipDrop, shipRemoval, switchBoard } from "./dom.js";
+import { setupPlayerShipDrop, shipRemoval } from "./dom.js";
 
 export class PlaceShips {
-  constructor(player, requiredShips = 2) {
+  constructor(player, requiredShips = 1) {
     this.ships = [
       //new Ship(3),
       //new Ship(3),
       new Ship(2),
-      new Ship(4),
+      //new Ship(4),
       //new Ship(5),
     ];
     this.currentPlayer = player;
