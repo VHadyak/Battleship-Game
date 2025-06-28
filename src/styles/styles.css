@@ -2,8 +2,8 @@
 
 :root {
   /* Custom CSS properties */
-  --board-size: 400px;
-  --grid-container-gap: 150px;
+  --board-size: 500px;
+  --grid-container-gap: 30px;
   --cell-size: calc((var(--board-size) / 10) - 1px);
 }
 
@@ -28,18 +28,53 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  padding-top: 70px;
 }
 
 .game-wrapper {
   position: relative;
   display: flex;
+  height: calc(var(--board-size) + 420px);
+  flex-direction: column;
+  gap: 30px;
+  outline: 1px solid red;
+}
+
+.header {
+  height: 160px;
+  position: fixed;
+  outline: 1px solid blue;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
   align-items: center;
+  font-size: 4rem;
 }
 
 /* GAMEBOARD */
 .grid-container {
   display: flex;
+  align-items: center;
   gap: var(--grid-container-gap);
+}
+
+.player-board-wrapper,
+.computer-board-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.real-player-status,
+.computer-player-status {
+  height: 40px;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
 .board {
@@ -49,40 +84,65 @@ body {
   width: var(--board-size);
 }
 
-.playerShips {
+.options-wrapper {
   position: absolute;
-  right: calc(100% + 20px);
-  outline: 1px solid black;
-  width: 350px;
-  height: 600px;
+  left: -10%;
+  top: 13.5%;
   display: flex;
+  gap: 25px;
+  align-items: center;
   flex-direction: column;
+}
+
+.playerShips {
+  height: 420px;
+  border-radius: 20px;
+  display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
+  flex-wrap: wrap;
+  gap: 60px;
 }
 
-/* Rotate ship button */
+.shipWrapper {
+  display: flex;
+  width: auto;
+  height: auto;
+}
+
+.vs {
+  display: flex;
+  height: 500px;
+  width: 100px;
+  font-size: 4.1rem;
+  align-items: center;
+  justify-content: center;
+  padding-top: 70px;
+  margin-right: 30px;
+}
+
+button.random-btn,
 button.rotate-btn {
-  position: fixed;
-  top: 30%;
-  width: 30px;
-  height: 30px;
-  margin-top: -40px;
-  cursor: pointer;
-}
-
-button.random-btn {
-  width: 30px;
-  height: 30px;
+  width: 60px;
+  height: 60px;
   cursor: pointer;
 }
 
 button.restart-btn {
-  width: 100px;
-  height: 30px;
+  width: 60px;
+  height: 100px;
   cursor: pointer;
-  display: none;
+}
+
+button:hover {
+  background-color: rgb(165, 210, 210);
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  border: 1px solid black;
+  border-radius: 4px;
 }
 
 /* Ships */
@@ -94,14 +154,13 @@ button.restart-btn {
   display: flex;
   cursor: pointer;
   gap: 1px;
-  transform-origin: center;
-  max-height: 190px;
+  max-width: 300px;
 
   /* Shift transition remaining ships within the panel after ship has been removed */
   overflow: hidden;
   transition:
     opacity 0.3s ease,
-    max-height 0.3s ease;
+    max-width 0.3s ease;
 }
 
 /* Remove later */
@@ -115,12 +174,43 @@ button.restart-btn {
   background-color: rgb(123, 10, 171);
 }
 
+.row-wrapper {
+  position: relative;
+}
+
+.row-labels {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+  position: absolute;
+  transform: translateX(-100%);
+  transform-origin: right;
+  transition: opacity 2.5s ease;
+}
+
+.col-labels {
+  display: flex;
+  font-size: 1.5rem;
+  margin-top: -15px;
+  transition: opacity 2.5s ease;
+}
+
+span {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #real-player-board {
   border: 1px solid rgb(14, 154, 25);
+  transition: opacity 2.5s ease;
 }
 
 #computer-board {
   border: 1px solid rgb(228, 20, 20);
+  transition: opacity 2.5s ease;
 }
 
 /* Gameboard cells */
@@ -153,14 +243,17 @@ button.restart-btn {
 /* CUSTOM CLASS STYLES */
 /* Disable the board */
 .disable {
-  background-color: rgb(197, 194, 194);
+  background-color: transparent;
   pointer-events: none;
 }
 
-/* Disable player's board when computer is attacking */
-.transparent {
-  background-color: transparent;
-  pointer-events: none;
+.dim {
+  opacity: 0.6;
+}
+
+.rotate-btn.dim,
+.random-btn.dim {
+  opacity: 0.2;
 }
 
 .ship {
@@ -181,6 +274,7 @@ button.restart-btn {
 
 [id^="ship"].highlightShip {
   outline: 2px solid rgb(227, 27, 27);
+  width: fit-content;
 }
 
 .rotated {

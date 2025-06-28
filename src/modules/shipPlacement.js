@@ -2,13 +2,13 @@ import { Ship } from "./ships.js";
 import { setupPlayerShipDrop, shipRemoval } from "./dom.js";
 
 export class PlaceShips {
-  constructor(player, requiredShips = 1) {
+  constructor(player, requiredShips = 5) {
     this.ships = [
-      //new Ship(3),
-      //new Ship(3),
       new Ship(2),
-      //new Ship(4),
-      //new Ship(5),
+      new Ship(3),
+      new Ship(3),
+      new Ship(4),
+      new Ship(5),
     ];
     this.currentPlayer = player;
     this.board = this.currentPlayer.gameboard.board;

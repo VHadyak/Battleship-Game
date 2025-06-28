@@ -10,7 +10,7 @@ import {
 import { realPlayer, computerPlayer } from "./modules/players.js";
 import { Game } from "./modules/game.js";
 
-export const game = new Game(realPlayer, computerPlayer);
+export const game = new Game(realPlayer, computerPlayer); // Player vs Computer
 
 document.addEventListener("DOMContentLoaded", () => {
   setupUI();

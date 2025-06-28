@@ -8,6 +8,15 @@ import { game } from "../app.js";
 const sidePanel = document.querySelector(".playerShips");
 const restartBtn = document.querySelector(".restart-btn");
 
+const realPlayerStatus = document.querySelector(".real-player-status");
+const computerPlayerStatus = document.querySelector(".computer-player-status");
+const realPlayerLabels = document.querySelectorAll(
+  ".row-labels.real-label, .col-labels.real-label",
+);
+const computerPlayerLabels = document.querySelectorAll(
+  ".row-labels.computer-label, .col-labels.computer-label",
+);
+
 let shipRotationState = {};
 
 // Track the id of the ship that currently being dragged, and ship segment
@@ -17,7 +26,7 @@ let currentSegmentOffset = 0;
 
 // Render gameboard for both players
 export function renderBoard(gameboard, boardElement) {
-  const boardSize = 5;
+  const boardSize = 10;
   const board = gameboard.board;
 
   boardElement.innerHTML = ""; // Clear the board before rerendering
@@ -47,7 +56,7 @@ export function renderBoard(gameboard, boardElement) {
 export function renderSidePanel() {
   sidePanel.innerHTML = "";
 
-  const shipSizes = [2];
+  const shipSizes = [2, 3, 3, 4, 5];
 
   shipSizes.forEach((size, i) => {
     const shipNum = i + 1;
@@ -95,34 +104,51 @@ export function updateCellState(value, cell) {
 }
 
 // Switch boards based on player's turn
-export function switchBoard(player, playerReady = true) {
+export function switchBoard(player, placing = false) {
+  document.querySelector(".random-btn").classList.add("disable", "dim");
+  document.querySelector(".rotate-btn").classList.add("disable", "dim");
+
+  computerPlayerBoardEl.classList.toggle("disable", player.isComputer);
+  computerPlayerBoardEl.classList.toggle("dim", player.isComputer);
+  realPlayerBoardEl.classList.toggle("dim", !player.isComputer);
+
+  realPlayerLabels.forEach((label) =>
+    label.classList.toggle("dim", !player.isComputer),
+  );
+  computerPlayerLabels.forEach((label) =>
+    label.classList.toggle("dim", player.isComputer),
+  );
+
+  computerPlayerStatus.textContent = "";
+  realPlayerStatus.textContent = "";
+
   if (player.isComputer) {
-    realPlayerBoardEl.classList.add("transparent");
-    computerPlayerBoardEl.classList.add("disable");
+    realPlayerStatus.textContent = "Computer is attacking...";
   } else {
-    computerPlayerBoardEl.classList.remove("disable");
-    computerPlayerBoardEl.classList.remove("transparent");
-    realPlayerBoardEl.classList.remove("transparent");
-    realPlayerBoardEl.classList.add("disable");
+    computerPlayerStatus.textContent = "Attack the computer!";
   }
 
-  // Condition when computer places ships
-  if (player.isComputer && !playerReady) {
-    computerPlayerBoardEl.classList.add("transparent");
+  // Set opacity to 1 if computer is currently placing ships
+  if (player.isComputer && placing) {
+    computerPlayerBoardEl.classList.remove("dim");
+    computerPlayerLabels.forEach((label) => label.classList.remove("dim"));
+    realPlayerStatus.textContent = "";
+    computerPlayerStatus.textContent = "Computer is placing their ships...";
   }
 }
 
 // Display the winner
 export function displayWinner(winner) {
-  if (winner.isComputer || !winner.isComputer) {
-    realPlayerBoardEl.classList.add("transparent");
-    computerPlayerBoardEl.classList.add("transparent");
-  }
+  computerPlayerBoardEl.classList.add("disable");
 
   if (winner.isComputer) {
-    console.log("Computer won");
+    computerPlayerBoardEl.classList.remove("dim");
+    computerPlayerLabels.forEach((label) => label.classList.remove("dim"));
+    computerPlayerStatus.textContent = "Computer wins!";
   } else {
-    console.log("Player won");
+    realPlayerBoardEl.classList.remove("dim");
+    realPlayerLabels.forEach((label) => label.classList.remove("dim"));
+    realPlayerStatus.textContent = "You win!";
   }
 }
 
@@ -198,8 +224,9 @@ function enableShipDragging() {
 
 // Remove ship from side panel after drag and drop
 export function shipRemoval(ship) {
-  ship.style.maxHeight = "0";
+  ship.style.maxWidth = "0";
   ship.style.opacity = "0";
+
   setTimeout(() => ship.remove(), 300);
 }
 
@@ -271,7 +298,7 @@ function hoverShipPlacementEffect(e, isValidPlacement) {
 }
 
 // Visually select the ship to drag
-export function highlightShipSelection() {
+function highlightShipSelection() {
   document.querySelectorAll("[id^='ship']").forEach((shipEl) => {
     shipEl.addEventListener("mousedown", (e) => {
       const ship = e.target.closest("[id^='ship']");
@@ -307,7 +334,7 @@ function handleShipRotation() {
   }
 }
 
-export function setupShipRotation() {
+function setupShipRotation() {
   const rotateBtn = document.querySelector(".rotate-btn");
 
   // Remove old listeners via clone
@@ -331,11 +358,10 @@ function handleRandomShipPlacement(ships, btn) {
   // Rerender player's gameboard after placement
   renderBoard(realPlayer.gameboard, realPlayerBoardEl);
 
-  btn.disabled = true;
   btn.style.cursor = "default";
 }
 
-export function setupRandomShipPlacement() {
+function setupRandomShipPlacement() {
   const ships = document.querySelectorAll(".shipWrapper");
   const randomBtn = document.querySelector(".random-btn");
 
@@ -349,9 +375,9 @@ export function setupRandomShipPlacement() {
 
 // HANDLE RESTART
 function handleRestart() {
-  restartBtn.style.display = "none";
+  document.querySelector(".random-btn").classList.remove("disable", "dim");
+  document.querySelector(".rotate-btn").classList.remove("disable", "dim");
 
-  switchBoard(computerPlayer);
   game.reset();
 
   shipRotationState = {};
@@ -359,9 +385,6 @@ function handleRestart() {
   // Rerender the boards after reset
   renderBoard(realPlayer.gameboard, realPlayerBoardEl);
   renderBoard(computerPlayer.gameboard, computerPlayerBoardEl);
-
-  realPlayerBoardEl.classList.remove("transparent", "disable");
-  computerPlayerBoardEl.classList.remove("transparent", "disable");
 
   renderSidePanel();
 
@@ -372,7 +395,7 @@ function handleRestart() {
   game.startSetup();
 }
 
-export function setupPlayAgainBtn() {
+function setupPlayAgain() {
   restartBtn.style.display = "flex";
   restartBtn.addEventListener("click", handleRestart);
 }
@@ -383,7 +406,9 @@ export function setupUI() {
   renderBoard(computerPlayer.gameboard, computerPlayerBoardEl);
 
   renderSidePanel();
+
   highlightShipSelection();
+  setupPlayAgain();
   setupShipRotation();
   setupRandomShipPlacement();
 }

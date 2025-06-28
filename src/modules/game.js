@@ -6,7 +6,7 @@ import {
   updateCellState,
   realPlayerBoardEl,
   computerPlayerBoardEl,
-  setupPlayAgainBtn,
+  setupPlayAgain,
 } from "./dom.js";
 
 import { AIController } from "./computerAI.js";
@@ -37,15 +37,10 @@ export class Game {
     this.waitForPlayerInterval = setInterval(() => {
       if (this.playerShipPlacer.allPlaced()) {
         clearInterval(this.waitForPlayerInterval);
-        console.log("Computer placing ships");
-
-        // Temporarily focus on computer's board when its making a decision
-        switchBoard(this.player2, false);
+        switchBoard(this.player2, true); // Optional
 
         // Computer done placing ships
         setTimeout(() => {
-          console.log("✅ Computer done — placing ships");
-
           // Computer's ship placements
           this.computerShipPlacer.placeComputerShips();
 
@@ -81,7 +76,7 @@ export class Game {
     clearInterval(this.turnInterval); // Clear any existing intervals
 
     // Set up an interval simulating computer's thinking
-    this.turnInterval = setInterval(() => this.handleComputerMove(), 6000);
+    this.turnInterval = setInterval(() => this.handleComputerMove(), 3000);
   }
 
   handleComputerMove() {
@@ -158,7 +153,6 @@ export class Game {
     this.turnInterval = null;
 
     displayWinner(this.currentPlayer);
-    setupPlayAgainBtn();
   }
 
   // Full reset of the game
