@@ -1,11 +1,6 @@
 import "./styles/styles.css";
 
-import {
-  realPlayerBoardEl,
-  computerPlayerBoardEl,
-  renderBoard,
-  setupUI,
-} from "./modules/dom.js";
+import { computerPlayerBoardEl, setupUI } from "./modules/dom.js";
 
 import { realPlayer, computerPlayer } from "./modules/players.js";
 import { Game } from "./modules/game.js";

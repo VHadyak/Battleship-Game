@@ -7,12 +7,13 @@
   </head>
   <body>
     <div class="header">Battleship</div>
+    <h1 class="winner-msg"></h1>
     <div class="game-wrapper">
       <div class="grid-container">
         <div class="options-wrapper">
-          <button type="button" class="restart-btn">Restart</button>
-          <button type="button" class="random-btn">Ran</button>
-          <button type="button" class="rotate-btn">Rot</button>
+          <button type="button" class="restart-btn disable dim"></button>
+          <button type="button" class="random-btn"></button>
+          <button type="button" class="rotate-btn"></button>
         </div>
         <div class="player-board-wrapper">
           <p class="real-player-status">Place your ships on the board!</p>
@@ -83,6 +84,16 @@
 
       <!-- Side panel -->
       <div class="playerShips"></div>
+      <div class="footer">
+        <a href="https://github.com/VHadyak" target="_blank" draggable="false">
+          <span>VHadyak</span>
+          <img
+            src="./assets/images/github-logo.svg"
+            alt="Github logo"
+            draggable="false"
+          />
+        </a>
+      </div>
     </div>
   </body>
 </html>

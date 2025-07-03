@@ -1,10 +1,19 @@
 @import "normalize.css";
 
+@font-face {
+  font-family: "Orbitron";
+  src: url("../assets/fonts/Orbitron-VariableFont_wght.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+}
+
 :root {
   /* Custom CSS properties */
+  --font: "Orbitron";
   --board-size: 500px;
   --grid-container-gap: 30px;
   --cell-size: calc((var(--board-size) / 10) - 1px);
+  --background: linear-gradient(to top, #0052d4, #65c7f7, #9cecfb);
 }
 
 html {
@@ -30,6 +39,8 @@ body {
   justify-content: center;
   flex-direction: column;
   padding-top: 70px;
+  font-family: var(--font);
+  background: var(--background);
 }
 
 .game-wrapper {
@@ -38,13 +49,38 @@ body {
   height: calc(var(--board-size) + 420px);
   flex-direction: column;
   gap: 30px;
-  outline: 1px solid red;
+}
+
+.winner-msg {
+  display: none;
+  position: absolute;
+  width: 500px;
+  top: 9rem;
+  font-size: 2.2rem;
+  text-align: center;
+  font-weight: bold;
+  text-shadow:
+    0 0 2px #a7fc58,
+    0 0 4px #a7fc58;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow:
+      0 0 2px #a7fc58,
+      0 0 4px #a7fc58;
+  }
+  100% {
+    text-shadow:
+      0 0 3px #f7c36a,
+      0 0 6px #f7c36a;
+  }
 }
 
 .header {
   height: 160px;
   position: fixed;
-  outline: 1px solid blue;
   top: 0;
   left: 0;
   width: 100%;
@@ -52,6 +88,50 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 4rem;
+  font-weight: bold;
+  user-select: none;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  width: 100%;
+  padding-bottom: 5px;
+  user-select: none;
+}
+
+.footer a {
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.711);
+  display: flex;
+  gap: 17px;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer img {
+  height: clamp(15px, 4vw, 20px);
+  width: clamp(15px, 4vw, 20px);
+  transition: transform 0.4s ease;
+  opacity: 0.7;
+}
+
+.footer img:hover {
+  transform: scale(1.1);
+}
+
+.footer span:hover {
+  color: #aef1f678;
+}
+
+.footer a:visited {
+  color: var(--font-color-content);
+  text-decoration: none;
 }
 
 /* GAMEBOARD */
@@ -75,6 +155,12 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+  font-weight: bold;
+  user-select: none;
+
+  color: #030a71;
+  text-shadow: 0 0 2px rgba(33, 31, 31, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .board {
@@ -101,7 +187,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 60px;
+  gap: 40px;
 }
 
 .shipWrapper {
@@ -114,11 +200,12 @@ body {
   display: flex;
   height: 500px;
   width: 100px;
-  font-size: 4.1rem;
+  font-size: 3rem;
   align-items: center;
   justify-content: center;
   padding-top: 70px;
   margin-right: 30px;
+  user-select: none;
 }
 
 button.random-btn,
@@ -126,23 +213,66 @@ button.rotate-btn {
   width: 60px;
   height: 60px;
   cursor: pointer;
+  transition: transform 0.3s;
 }
 
 button.restart-btn {
   width: 60px;
   height: 100px;
   cursor: pointer;
+  background: url(../assets/images/rotate.svg) no-repeat;
+  background-position: center;
+  background-size: 50px 50px;
+  transition: transform 0.3s;
 }
 
-button:hover {
-  background-color: rgb(165, 210, 210);
+button.restart-btn:hover,
+button.rotate-btn:hover,
+button.random-btn:hover {
+  transform: scale(1.1);
+  background-color: #48b5ec;
+}
+
+button.random-btn {
+  background: url(../assets/images/random.svg) no-repeat;
+  background-position: center;
+  background-size: 50px 50px;
+}
+
+button.rotate-btn {
+  position: relative;
+  background: url(../assets/images/ship.svg) no-repeat;
+  background-position: center;
+  background-size: 40px 40px;
+}
+
+button.rotate-btn::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  background: url(../assets/images/rotate.svg) no-repeat;
+  background-size: contain;
 }
 
 button {
-  background-color: transparent;
-  border: none;
   border: 1px solid black;
   border-radius: 4px;
+}
+
+.shipName {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  height: 100%;
+  z-index: 2;
+  user-select: none;
+}
+
+.rotated .shipName {
+  height: 0;
 }
 
 /* Ships */
@@ -152,8 +282,11 @@ button {
 #ship4,
 #ship5 {
   display: flex;
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: bold;
+  justify-content: center;
   cursor: pointer;
-  gap: 1px;
   max-width: 300px;
 
   /* Shift transition remaining ships within the panel after ship has been removed */
@@ -161,9 +294,12 @@ button {
   transition:
     opacity 0.3s ease,
     max-width 0.3s ease;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
-/* Remove later */
 #ship1 > div.cell,
 #ship2 > div.cell,
 #ship3 > div.cell,
@@ -171,7 +307,26 @@ button {
 #ship5 > div.cell {
   height: var(--cell-size);
   width: var(--cell-size);
-  background-color: rgb(123, 10, 171);
+}
+
+#ship1 > div.cell {
+  background-color: #decf22;
+}
+
+#ship2 > div.cell {
+  background-color: #28edd9;
+}
+
+#ship3 > div.cell {
+  background-color: rgb(236, 120, 66);
+}
+
+#ship4 > div.cell {
+  background-color: rgb(236, 188, 126);
+}
+
+#ship5 > div.cell {
+  background-color: rgb(91, 239, 142);
 }
 
 .row-wrapper {
@@ -185,14 +340,18 @@ button {
   position: absolute;
   transform: translateX(-100%);
   transform-origin: right;
-  transition: opacity 2.5s ease;
+  transition: opacity 1.5s ease;
+  opacity: 1;
+  user-select: none;
 }
 
 .col-labels {
   display: flex;
   font-size: 1.5rem;
   margin-top: -15px;
-  transition: opacity 2.5s ease;
+  transition: opacity 1.5s ease;
+  opacity: 1;
+  user-select: none;
 }
 
 span {
@@ -204,13 +363,19 @@ span {
 }
 
 #real-player-board {
-  border: 1px solid rgb(14, 154, 25);
-  transition: opacity 2.5s ease;
+  background-color: black;
+  transition: opacity 1.5s ease;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
 #computer-board {
-  border: 1px solid rgb(228, 20, 20);
-  transition: opacity 2.5s ease;
+  background-color: black;
+  transition: opacity 1.5s ease;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
 /* Gameboard cells */
@@ -218,25 +383,63 @@ span {
 .column {
   display: flex;
   flex: 1;
+}
 
-  & .column {
-    border: 1px solid rgb(0, 0, 0);
-  }
+/* Checker board pattern */
+.row:nth-child(odd) .column:nth-child(even) {
+  background-color: #abdefd;
+}
+
+.row:nth-child(even) .column:nth-child(odd) {
+  background-color: #abdefd;
+}
+
+.row:nth-child(odd) .column:nth-child(odd) {
+  background-color: #e0ffff;
+}
+
+.row:nth-child(even) .column:nth-child(even) {
+  background-color: #e0ffff;
+}
+
+/* Remove edge borders */
+/* First row */
+.column:nth-child(-n + 10) {
+  border-top: none;
+}
+
+/* Last row */
+.row:nth-child(n + 10) {
+  border-bottom: none;
+}
+
+/* First column */
+.column:nth-child(1) {
+  border-left: none;
+}
+
+/* Last column */
+.column:nth-child(10) {
+  border-right: none;
 }
 
 /* Exclude hover effect over miss and hit cells */
-#computer-board .column:not(.miss, .hit):hover {
-  background-color: rgb(188, 181, 173);
-  cursor: pointer;
+#computer-board .column:hover {
+  background-color: rgb(43, 214, 24) !important;
 }
 
-#real-player-board .column:not(.ship):hover {
-  background-color: transparent;
+#computer-board .column {
+  cursor:
+    url("../assets/images/crosshair.png") 32 32,
+    crosshair;
+}
+
+#real-player-board .column:hover {
   cursor: default;
 }
 
 /* Disable clicking over miss and hit cells */
-.column:is(.miss, .hit) {
+.column:is(.miss, .hit, .sunk) {
   pointer-events: none;
 }
 
@@ -248,33 +451,50 @@ span {
 }
 
 .dim {
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .rotate-btn.dim,
-.random-btn.dim {
-  opacity: 0.2;
+.random-btn.dim,
+.restart-btn.dim {
+  opacity: 0.3;
 }
 
-.ship {
-  background-color: rgb(78, 79, 78);
+#real-player-board .ship {
+  background-color: rgb(63, 59, 53);
+}
+
+#computer-board .ship {
+  background-color: rgb(63, 59, 53);
 }
 
 .hit {
-  background-color: rgb(148, 40, 40);
+  background-color: rgb(250, 103, 77) !important;
+  background-image: url(../assets/images/hit.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .miss {
-  background-color: rgb(26, 81, 99);
+  background-color: rgb(78, 183, 253) !important;
+  background-image: url(../assets/images/miss.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .sunk {
-  background-color: chartreuse;
+  background-color: rgb(248, 206, 68) !important;
+  background-image: url(../assets/images/sunk.svg);
+  background-repeat: no-repeat;
+  background-size: 40px, 40px;
+  background-position: center;
 }
 
 [id^="ship"].highlightShip {
-  outline: 2px solid rgb(227, 27, 27);
   width: fit-content;
+  outline: 3px solid rgb(30, 28, 28);
 }
 
 .rotated {
@@ -282,16 +502,23 @@ span {
 }
 
 .hovered {
-  background-color: green;
+  background-color: rgb(10, 166, 18) !important;
 }
 
 .invalid {
-  background-color: red;
+  background-color: rgb(223, 60, 60) !important;
 }
 
-button.enableRotate {
-  opacity: 1;
-  pointer-events: all;
+.computer-shadow {
+  box-shadow:
+    rgba(128, 4, 4, 0.5) 0px 3px 6px,
+    rgba(143, 4, 4, 0.5) 0px 3px 6px !important;
+}
+
+.player-shadow {
+  box-shadow:
+    rgba(11, 135, 4, 0.5) 0px 3px 6px,
+    rgba(43, 143, 4, 0.5) 0px 3px 6px !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {

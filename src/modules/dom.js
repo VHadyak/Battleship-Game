@@ -8,6 +8,7 @@ import { game } from "../app.js";
 const sidePanel = document.querySelector(".playerShips");
 const restartBtn = document.querySelector(".restart-btn");
 
+const winnerMsg = document.querySelector(".winner-msg");
 const realPlayerStatus = document.querySelector(".real-player-status");
 const computerPlayerStatus = document.querySelector(".computer-player-status");
 const realPlayerLabels = document.querySelectorAll(
@@ -16,6 +17,13 @@ const realPlayerLabels = document.querySelectorAll(
 const computerPlayerLabels = document.querySelectorAll(
   ".row-labels.computer-label, .col-labels.computer-label",
 );
+const shipNames = [
+  "Destroyer",
+  "Submarine",
+  "Cruiser",
+  "Battleship",
+  "Carrier",
+];
 
 let shipRotationState = {};
 
@@ -70,6 +78,10 @@ export function renderSidePanel() {
     shipEl.setAttribute("data-length", size);
     shipEl.setAttribute("data-orientation", "horizontal");
 
+    const span = document.createElement("span");
+    span.classList.add("shipName");
+    span.textContent = shipNames[i];
+
     for (let i = 0; i < size; i++) {
       const segment = document.createElement("div");
       segment.classList.add("cell");
@@ -77,6 +89,7 @@ export function renderSidePanel() {
       shipEl.appendChild(segment);
     }
 
+    shipEl.appendChild(span);
     shipWrapper.appendChild(shipEl);
     sidePanel.appendChild(shipWrapper);
   });
@@ -98,6 +111,7 @@ export function updateCellState(value, cell) {
       cell.classList.add("miss");
       break;
     case "sunk":
+      cell.classList.remove("hit");
       cell.classList.add("sunk");
       break;
   }
@@ -105,51 +119,82 @@ export function updateCellState(value, cell) {
 
 // Switch boards based on player's turn
 export function switchBoard(player, placing = false) {
-  document.querySelector(".random-btn").classList.add("disable", "dim");
-  document.querySelector(".rotate-btn").classList.add("disable", "dim");
+  const isComputer = player.isComputer;
 
-  computerPlayerBoardEl.classList.toggle("disable", player.isComputer);
-  computerPlayerBoardEl.classList.toggle("dim", player.isComputer);
-  realPlayerBoardEl.classList.toggle("dim", !player.isComputer);
+  // Disable random/rotate buttons by default
+  const randomBtn = document.querySelector(".random-btn");
+  const rotateBtn = document.querySelector(".rotate-btn");
+  const restartBtn = document.querySelector(".restart-btn");
+
+  rotateBtn.classList.add("disable", "dim");
+  restartBtn.classList.add("disable", "dim");
+
+  // Update board and label visibility
+  computerPlayerBoardEl.classList.toggle("disable", isComputer);
+  computerPlayerBoardEl.classList.toggle("dim", isComputer && !placing);
+  realPlayerBoardEl.classList.toggle("dim", !isComputer || placing);
 
   realPlayerLabels.forEach((label) =>
-    label.classList.toggle("dim", !player.isComputer),
+    label.classList.toggle("dim", !isComputer || placing),
   );
   computerPlayerLabels.forEach((label) =>
-    label.classList.toggle("dim", player.isComputer),
+    label.classList.toggle("dim", isComputer && !placing),
   );
 
+  // Reset status messages
   computerPlayerStatus.textContent = "";
   realPlayerStatus.textContent = "";
 
-  if (player.isComputer) {
-    realPlayerStatus.textContent = "Computer is attacking...";
+  // Players placing their ships (update status)
+  if (placing) {
+    if (isComputer) {
+      computerPlayerStatus.textContent = "Computer is placing their ships...";
+      computerPlayerBoardEl.classList.remove("dim");
+      computerPlayerLabels.forEach((label) => label.classList.remove("dim"));
+      randomBtn.classList.add("disable", "dim");
+    } else {
+      realPlayerStatus.textContent = "Place your ships on the board!";
+      computerPlayerBoardEl.classList.add("disable", "dim");
+      realPlayerBoardEl.classList.remove("dim");
+      randomBtn.classList.remove("disable", "dim");
+      rotateBtn.classList.remove("disable", "dim");
+    }
   } else {
-    computerPlayerStatus.textContent = "Attack the computer!";
-  }
-
-  // Set opacity to 1 if computer is currently placing ships
-  if (player.isComputer && placing) {
-    computerPlayerBoardEl.classList.remove("dim");
-    computerPlayerLabels.forEach((label) => label.classList.remove("dim"));
-    realPlayerStatus.textContent = "";
-    computerPlayerStatus.textContent = "Computer is placing their ships...";
+    // Players placed their ships (now attacking)
+    if (isComputer) {
+      realPlayerStatus.textContent = "Computer is attacking...";
+    } else {
+      computerPlayerStatus.textContent = "Attack the computer!";
+    }
+    restartBtn.classList.remove("disable", "dim");
   }
 }
 
 // Display the winner
 export function displayWinner(winner) {
+  const isComputer = winner.isComputer;
+
   computerPlayerBoardEl.classList.add("disable");
 
-  if (winner.isComputer) {
-    computerPlayerBoardEl.classList.remove("dim");
-    computerPlayerLabels.forEach((label) => label.classList.remove("dim"));
-    computerPlayerStatus.textContent = "Computer wins!";
-  } else {
-    realPlayerBoardEl.classList.remove("dim");
-    realPlayerLabels.forEach((label) => label.classList.remove("dim"));
-    realPlayerStatus.textContent = "You win!";
-  }
+  const winnerBoard = isComputer ? computerPlayerBoardEl : realPlayerBoardEl;
+  const loserBoard = isComputer ? realPlayerBoardEl : computerPlayerBoardEl;
+
+  // Row-col labels
+  const winnerLabels = isComputer ? computerPlayerLabels : realPlayerLabels;
+
+  // Winner message
+  winnerMsg.style.display = "block";
+  winnerMsg.textContent = isComputer ? "Computer wins!" : "You win!";
+
+  realPlayerStatus.textContent = "";
+  computerPlayerStatus.textContent = "";
+
+  winnerBoard.classList.remove("dim");
+  loserBoard.classList.add("dim");
+
+  winnerLabels.forEach((label) => label.classList.remove("dim"));
+
+  winnerBoard.classList.add(isComputer ? "computer-shadow" : "player-shadow");
 }
 
 // Get coordinates from the clicked cell
@@ -175,6 +220,7 @@ export function setupPlayerShipDrop(callback, isValidPlacement) {
 
     // Rerender the gameboard to update player's ship placements
     renderBoard(realPlayer.gameboard, realPlayerBoardEl);
+    document.querySelector(".restart-btn").classList.remove("disable", "dim");
   });
 
   // Allow drops on the gameboard
@@ -316,6 +362,10 @@ function highlightShipSelection() {
 // HANDLE SHIP ROTATION
 function handleShipRotation() {
   const selectedShip = document.querySelector("[id^='ship'].highlightShip");
+  const shipName = document.querySelector(
+    "[id^='ship'].highlightShip .shipName",
+  );
+
   if (!selectedShip) return;
 
   const selectedShipID = selectedShip.id;
@@ -328,9 +378,11 @@ function handleShipRotation() {
   if (isRotated) {
     selectedShip.setAttribute("data-orientation", "vertical");
     selectedShip.classList.add("rotated");
+    shipName.style.transform = "rotate(-90deg)";
   } else {
     selectedShip.setAttribute("data-orientation", "horizontal");
     selectedShip.classList.remove("rotated");
+    shipName.style.transform = "rotate(0deg)";
   }
 }
 
@@ -359,6 +411,7 @@ function handleRandomShipPlacement(ships, btn) {
   renderBoard(realPlayer.gameboard, realPlayerBoardEl);
 
   btn.style.cursor = "default";
+  document.querySelector(".restart-btn").classList.add("disable", "dim");
 }
 
 function setupRandomShipPlacement() {
@@ -375,8 +428,9 @@ function setupRandomShipPlacement() {
 
 // HANDLE RESTART
 function handleRestart() {
-  document.querySelector(".random-btn").classList.remove("disable", "dim");
-  document.querySelector(".rotate-btn").classList.remove("disable", "dim");
+  winnerMsg.style.display = "none";
+  realPlayerBoardEl.classList.remove("player-shadow");
+  computerPlayerBoardEl.classList.remove("computer-shadow");
 
   game.reset();
 
@@ -392,15 +446,20 @@ function handleRestart() {
   setupShipRotation();
   setupRandomShipPlacement();
 
+  switchBoard(realPlayer, true); // Real player placing their ships
   game.startSetup();
+
+  // Start with restart button being disabled
+  document.querySelector(".restart-btn").classList.add("disable", "dim");
 }
 
 function setupPlayAgain() {
-  restartBtn.style.display = "flex";
   restartBtn.addEventListener("click", handleRestart);
 }
 
 export function setupUI() {
+  setupPlayAgain();
+
   // Render the game boards for 2 players
   renderBoard(realPlayer.gameboard, realPlayerBoardEl);
   renderBoard(computerPlayer.gameboard, computerPlayerBoardEl);
@@ -408,7 +467,7 @@ export function setupUI() {
   renderSidePanel();
 
   highlightShipSelection();
-  setupPlayAgain();
+
   setupShipRotation();
   setupRandomShipPlacement();
 }

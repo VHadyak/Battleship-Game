@@ -76,7 +76,7 @@ export class Game {
     clearInterval(this.turnInterval); // Clear any existing intervals
 
     // Set up an interval simulating computer's thinking
-    this.turnInterval = setInterval(() => this.handleComputerMove(), 3000);
+    this.turnInterval = setInterval(() => this.handleComputerMove(), 2000);
   }
 
   handleComputerMove() {

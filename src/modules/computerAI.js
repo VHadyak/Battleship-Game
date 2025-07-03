@@ -23,8 +23,8 @@ export class AIController {
   computerAttacks() {
     let coordinate;
 
-    // If next target is known after 2+ hits, update the coordinate
     if (this.nextTarget) {
+      // If next target is known after 2+ hits, target directional cell
       coordinate = this.nextTarget;
       this.nextTarget = null;
     } else if (this.lastHit) {
