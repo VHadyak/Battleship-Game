@@ -1,9 +1,9 @@
+import { computerPlayer, realPlayer } from "./players.js";
+import { game } from "../app.js";
+
 // Player board elements
 export const realPlayerBoardEl = document.querySelector("#real-player-board");
 export const computerPlayerBoardEl = document.querySelector("#computer-board");
-
-import { computerPlayer, realPlayer } from "./players.js";
-import { game } from "../app.js";
 
 const sidePanel = document.querySelector(".playerShips");
 const restartBtn = document.querySelector(".restart-btn");
@@ -25,6 +25,7 @@ const shipNames = [
   "Carrier",
 ];
 
+// Track ship rotation state
 let shipRotationState = {};
 
 // Track the id of the ship that currently being dragged, and ship segment
@@ -72,6 +73,7 @@ export function renderSidePanel() {
     const shipWrapper = document.createElement("div");
     shipWrapper.classList.add("shipWrapper", `wrapper${shipNum}`);
 
+    // Ship attributes
     const shipEl = document.createElement("div");
     shipEl.id = `ship${shipNum}`;
     shipEl.setAttribute("draggable", true);
@@ -82,6 +84,7 @@ export function renderSidePanel() {
     span.classList.add("shipName");
     span.textContent = shipNames[i];
 
+    // Each cell of the ship
     for (let i = 0; i < size; i++) {
       const segment = document.createElement("div");
       segment.classList.add("cell");

@@ -53,8 +53,6 @@ export class AIController {
     return [x, y];
   }
 
-  // [!] Use 'Target and Hunt' strategy for computer's attack
-
   // Randomly search for a ship to hit
   huntShip() {
     let coordinate;

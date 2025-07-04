@@ -1,11 +1,11 @@
 import "./styles/styles.css";
 
 import { computerPlayerBoardEl, setupUI } from "./modules/dom.js";
-
 import { realPlayer, computerPlayer } from "./modules/players.js";
 import { Game } from "./modules/game.js";
 
-export const game = new Game(realPlayer, computerPlayer); // Player vs Computer
+// Player vs Computer
+export const game = new Game(realPlayer, computerPlayer);
 
 document.addEventListener("DOMContentLoaded", () => {
   setupUI();

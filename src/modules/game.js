@@ -6,7 +6,6 @@ import {
   updateCellState,
   realPlayerBoardEl,
   computerPlayerBoardEl,
-  setupPlayAgain,
 } from "./dom.js";
 
 import { AIController } from "./computerAI.js";
