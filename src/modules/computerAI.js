@@ -96,40 +96,56 @@ export class AIController {
     return this.huntShip();
   }
 
+  // Determine direction
+  getDirection([x1, y1], [x2, y2]) {
+    const dx = x2 - x1; // if -1 then upward movement, 1 then downward
+    const dy = y2 - y1; // if -1 then leftward movement, 1 then rightward
+    return [dx, dy];
+  }
+
+  // Next attack coordinate based on predicted direction
+  getNextCoordinate([x, y], [dx, dy]) {
+    return [x + dx, y + dy];
+  }
+
+  // Reverse direction
+  reverseDirection([dx, dy]) {
+    return [-dx, -dy];
+  }
+
   // Predict the ship's direction for computer's attack (2+ hits to the same ship)
   findDirectionTarget(hitCoordinates) {
-    const [x1, y1] = hitCoordinates[0]; // First hit
-    const [x2, y2] = hitCoordinates[1]; // Second hit
+    if (hitCoordinates.length < 2) return null;
 
-    let dx = 0;
-    let dy = 0;
+    // Fallback: sort coordinates if original order is ambiguous
+    // (ex: if the first hit is in the middle of the ship)
+    const sortedCoordinates = [...hitCoordinates].sort(([x1, y1], [x2, y2]) => {
+      return x1 !== x2 ? x1 - x2 : y1 - y2;
+    });
 
-    if (x1 === x2) {
-      dy = y2 > y1 ? 1 : -1; // Horizontal ship (dy = 1 move right)
-    } else if (y1 === y2) {
-      dx = x2 > x1 ? 1 : -1; // Vertical ship (dx = 1 move down)
-    }
+    const attackDirection = (hits) => {
+      // First and last known hit
+      const initialHit = hits[0];
+      const lastHit = hits[hits.length - 1];
 
-    const [lastX, lastY] = hitCoordinates[hitCoordinates.length - 1]; // Last hit
-    const [firstX, firstY] = hitCoordinates[0]; // First hit
+      // Get direction based on the first two hits
+      let direction = this.getDirection(hits[0], hits[1]);
 
-    // Move in the direction based on the most recent hit
-    const forwardX = lastX + dx;
-    const forwardY = lastY + dy;
+      // Attack forward from last known hit
+      const [forwardX, forwardY] = this.getNextCoordinate(lastHit, direction);
+      if (this.isValidAttack(forwardX, forwardY)) return [forwardX, forwardY];
 
-    // Move backwards from the first hit in the opposite direction,
-    // Use case if forward direction is blocked ('miss' cell or edge of the board)
-    const backX = firstX - dx;
-    const backY = firstY - dy;
+      // Attack backward from initial hit if forward attack fails (miss cell or out of bounds)
+      direction = this.reverseDirection(direction);
+      const [backX, backY] = this.getNextCoordinate(initialHit, direction);
+      if (this.isValidAttack(backX, backY)) return [backX, backY];
 
-    // Return the next valid target for computer to attack
-    if (this.isValidAttack(forwardX, forwardY)) {
-      return [forwardX, forwardY];
-    }
+      return null; // Fallback if both directions fail
+    };
 
-    if (this.isValidAttack(backX, backY)) {
-      return [backX, backY];
-    }
+    return (
+      attackDirection(hitCoordinates) || attackDirection(sortedCoordinates)
+    );
   }
 
   // Update target-tracking state after computer's attack
@@ -146,21 +162,26 @@ export class AIController {
       this.currTargetShip.hitPositions.length >= 2;
 
     if (isHit) {
-      if (ship.hitPositions.length >= 2) {
-        // If 2+ hits registered, predict the ship's direction for the next attack
-        this.nextTarget = this.findDirectionTarget(ship.hitPositions);
-      }
       this.lastHit = [x, y];
       this.currTargetShip = ship; // Save the currently attacked ship
-    } else if (targetShipSunk) {
-      // Reset all targeting state
-      this.resetTargetState();
+
+      // If 2+ hits registered, predict the ship's orientation for the next attack
+      if (this.currTargetShip.hitPositions.length >= 2) {
+        this.nextTarget = this.findDirectionTarget(
+          this.currTargetShip.hitPositions,
+        );
+      }
     } else if (resumePrevAttack) {
-      // Continue to attack the ship from where it was last left off
+      // Missed, keep attacking the known ship based on previous hits
       this.nextTarget = this.findDirectionTarget(
         this.currTargetShip.hitPositions,
       );
       this.lastHit = null;
+    }
+
+    if (targetShipSunk) {
+      // Reset all targeting state
+      this.resetTargetState();
     }
   }
 
