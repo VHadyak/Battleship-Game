@@ -198,6 +198,8 @@ export function displayWinner(winner) {
   winnerLabels.forEach((label) => label.classList.remove("dim"));
 
   winnerBoard.classList.add(isComputer ? "computer-shadow" : "player-shadow");
+
+  restartBtn.classList.add("restart-btn-shadow");
 }
 
 // Get coordinates from the clicked cell
@@ -431,6 +433,7 @@ function setupRandomShipPlacement() {
 
 // HANDLE RESTART
 function handleRestart() {
+  restartBtn.classList.remove("restart-btn-shadow");
   winnerMsg.style.display = "none";
   realPlayerBoardEl.classList.remove("player-shadow");
   computerPlayerBoardEl.classList.remove("computer-shadow");
