@@ -40,6 +40,7 @@ export class Game {
 
         // Computer done placing ships
         setTimeout(() => {
+          if (this.gameOver) return;
           // Computer's ship placements
           this.computerShipPlacer.placeComputerShips();
 
@@ -63,11 +64,11 @@ export class Game {
   }
 
   handlePlayerMove(cell) {
+    if (this.gameOver) return;
+
     const [x, y] = getCoordinates(cell);
 
     this.opponent.gameboard.receiveAttack(x, y);
-
-    if (this.gameOver) return;
 
     this.processMoveResult(cell, computerPlayerBoardEl);
     this.switchTurn(); // Give turn to the computer
@@ -79,12 +80,12 @@ export class Game {
   }
 
   handleComputerMove() {
+    if (this.gameOver) return;
+
     const [x, y] = this.AI.computerAttacks(); // Get coordinate of the computer attack
     const cell = realPlayerBoardEl.querySelector(
       `[data-row="${x}"][data-col="${y}"]`,
     );
-
-    if (this.gameOver) return;
 
     this.processMoveResult(cell, realPlayerBoardEl);
     this.switchTurn(); // Give turn back to the real player
@@ -148,8 +149,16 @@ export class Game {
   // End the game after the winner was found
   endGame() {
     this.gameOver = true;
-    clearInterval(this.turnInterval);
-    this.turnInterval = null;
+
+    if (this.turnInterval) {
+      clearInterval(this.turnInterval);
+      this.turnInterval = null;
+    }
+
+    if (this.waitForPlayerInterval) {
+      clearInterval(this.waitForPlayerInterval);
+      this.waitForPlayerInterval = null;
+    }
 
     displayWinner(this.currentPlayer);
   }
